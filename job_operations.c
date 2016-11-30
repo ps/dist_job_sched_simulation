@@ -2,7 +2,13 @@
 
 // IMPORTANT: make sure job lock is held before using this function
 // Adds to end of the Jobs list
-void add_job(Jobs * jobs, JobFunction job_function) {
+
+// returns FALSE if job was not added, TRUE otherwise
+int add_job(Jobs * jobs, JobFunction job_function) {
+    // max capacity reached can't add more jobs
+    if(jobs->size == jobs->max_capacity) {
+        return FALSE;
+    }
     JobNode * new_job = (JobNode *)malloc(sizeof(JobNode));
     new_job->job_function = job_function;
 
@@ -16,6 +22,7 @@ void add_job(Jobs * jobs, JobFunction job_function) {
         jobs->next_job = new_job;
     }
     jobs->size++;
+    return TRUE;
 }
 
 // IMPORTANT: make sure job lock is held before using this function

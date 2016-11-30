@@ -6,6 +6,7 @@ void init_worker_param(WorkerParams * worker_param, int thread_id) {
     pthread_mutex_init(&log->log_lock, NULL);
     
     Jobs * jobs = (Jobs *)malloc(sizeof(Jobs));
+    jobs->max_capacity = MAX_WORKER_QUEUE_CAPACITY;
     jobs->size = 0;
     jobs->terminate = FALSE;
     jobs->next_job = NULL;
@@ -32,8 +33,15 @@ void launch_master_node(int num_workers) {
         Jobs * jobs = worker_params[i].jobs;
         printf("adding 2 jobs to id %i\n", worker_params[i].thread_id);
         pthread_mutex_lock(&jobs->jobs_lock);
-        add_job(jobs, &dummy_job);
-        add_job(jobs, &dummy_job);
+        int j;
+        for(j = 0; j < 15; j++) {
+            int job_added = add_job(jobs, &dummy_job);
+            if(job_added == TRUE) {
+                printf("Job added to node %i, queue_size: %i\n", worker_params[i].thread_id, jobs->size);
+            } else {
+                printf("Job NOT added to node %i, queue_size: %i\n", worker_params[i].thread_id, jobs->size);
+            }
+        }
         pthread_cond_signal(&jobs->work_added);
         pthread_mutex_unlock(&jobs->jobs_lock);
         int sleep_time = 3;

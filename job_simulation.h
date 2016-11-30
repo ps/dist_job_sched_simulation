@@ -11,6 +11,8 @@
 #define TRUE 1
 #define FALSE 0
 
+#define MAX_WORKER_QUEUE_CAPACITY 5
+
 // defining function pointer with void return and no arguments provided
 typedef void (*JobFunction)();
 
@@ -20,6 +22,7 @@ typedef struct JobNode {
 } JobNode;
 
 typedef struct Jobs {
+    int max_capacity;
     int size;
     int terminate;
     // end pointer
@@ -55,7 +58,7 @@ long usecs();
 void dummy_job();
 void dummy_job2();
 JobFunction remove_job(Jobs * jobs);
-void add_job(Jobs * jobs, JobFunction job_function);
+int add_job(Jobs * jobs, JobFunction job_function);
 void * worker_node(void * params);
 void init_worker_param(WorkerParams * worker_param, int thread_id);
 void launch_master_node(int num_workers);

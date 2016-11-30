@@ -2,7 +2,7 @@
 
 
 int main(int argc, char ** argv) {
-    int num_workers = 30;
+    int num_workers = 3;
     JobFunction job = &dummy_job;
     job();
     JobFunction job2 = &dummy_job2;
