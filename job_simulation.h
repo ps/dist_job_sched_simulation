@@ -7,6 +7,7 @@
 #include <stddef.h> // for NULL
 #include <sys/time.h>
 #include <unistd.h> // for sleep
+#include <limits.h> // max int size
 
 #define TRUE 1
 #define FALSE 0

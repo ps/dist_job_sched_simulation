@@ -8,7 +8,7 @@ int select_worker_node(WorkerParams * worker_params, int num_workers, int previo
         // there is no cross thread worry
         return rand() % num_workers;
     } else if (selection_strategy == NODE_SELECT_SHORTEST_QUEUE) {
-        int shortest_queue_size = 0;
+        int shortest_queue_size = INT_MAX;
         int node_index = 0;
         int i;
         for(i = 0; i < num_workers; i++) {
@@ -72,11 +72,6 @@ void launch_master_node(int num_workers) {
         printf("random: %i\n", n);
     }
 
-    printf("SQ selection test\n");
-    for(i = 0; i < 5; i++) {
-        n = select_worker_node(worker_params, num_workers, 0, NODE_SELECT_SHORTEST_QUEUE);
-        printf("SQ: %i\n", n);
-    }
 
     for(i = 0; i < num_workers; i++) {
         printf("adding 2 jobs to id %i\n", worker_params[i].thread_id);
@@ -99,6 +94,11 @@ void launch_master_node(int num_workers) {
     
 
     printf("Master joining on workers.\n");
+    printf("SQ selection test\n");
+    for(i = 0; i < 5; i++) {
+        n = select_worker_node(worker_params, num_workers, 0, NODE_SELECT_SHORTEST_QUEUE);
+        printf("SQ: %i\n", n);
+    }
     for(i = 0; i < num_workers; i++) {
         pthread_join(worker[i], NULL);
         printf("Printing log for thread id %i\n", i);
