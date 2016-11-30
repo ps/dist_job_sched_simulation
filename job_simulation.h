@@ -29,8 +29,6 @@ typedef struct Jobs {
     JobNode * last_job;
     // front pointer
     JobNode * next_job;
-    pthread_mutex_t jobs_lock;
-    pthread_cond_t work_added;
 } Jobs;
 
 typedef struct LogNode {
@@ -48,6 +46,8 @@ typedef struct WorkerParams {
     int thread_id;
     Log * log;
     Jobs * jobs;
+    pthread_mutex_t jobs_lock;
+    pthread_cond_t work_added;
 } WorkerParams;
 
 

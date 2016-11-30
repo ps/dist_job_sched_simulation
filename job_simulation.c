@@ -21,6 +21,10 @@ int main(int argc, char ** argv) {
         printf("jobs size upon removing: %i\n", jobs->size);
         to_execute();
     }*/
+    /*long start = usecs();
+    sleep(3);
+    long end = usecs();
+    printf("time: %li", end - start);*/
 
 
     launch_master_node(num_workers);

@@ -11,8 +11,8 @@ void init_worker_param(WorkerParams * worker_param, int thread_id) {
     jobs->terminate = FALSE;
     jobs->next_job = NULL;
     jobs->last_job = NULL;
-    pthread_mutex_init(&jobs->jobs_lock, NULL);
-    pthread_cond_init(&jobs->work_added, NULL);
+    pthread_mutex_init(&worker_param->jobs_lock, NULL);
+    pthread_cond_init(&worker_param->work_added, NULL);
 
     worker_param->jobs = jobs;
     worker_param->log = log;
@@ -30,11 +30,11 @@ void launch_master_node(int num_workers) {
     }
 
     for(i = 0; i < num_workers; i++) {
-        Jobs * jobs = worker_params[i].jobs;
         printf("adding 2 jobs to id %i\n", worker_params[i].thread_id);
-        pthread_mutex_lock(&jobs->jobs_lock);
+        pthread_mutex_lock(&worker_params[i].jobs_lock);
+        Jobs * jobs = worker_params[i].jobs;
         int j;
-        for(j = 0; j < 15; j++) {
+        for(j = 0; j < 3; j++) {
             int job_added = add_job(jobs, &dummy_job);
             if(job_added == TRUE) {
                 printf("Job added to node %i, queue_size: %i\n", worker_params[i].thread_id, jobs->size);
@@ -42,17 +42,19 @@ void launch_master_node(int num_workers) {
                 printf("Job NOT added to node %i, queue_size: %i\n", worker_params[i].thread_id, jobs->size);
             }
         }
-        pthread_cond_signal(&jobs->work_added);
-        pthread_mutex_unlock(&jobs->jobs_lock);
-        int sleep_time = 3;
+        jobs->terminate = TRUE;
+        pthread_cond_broadcast(&worker_params[i].work_added);
+        pthread_mutex_unlock(&worker_params[i].jobs_lock);
+        /*int sleep_time = 3;
         printf("master sleeping for %i sec.\n", sleep_time);
         //sleep(sleep_time);
         printf("master awoke and adding one more job and telling thread to die\n");
-        pthread_mutex_lock(&jobs->jobs_lock);
+        pthread_mutex_lock(&worker_params[i].jobs_lock);
+        jobs = worker_params[i].jobs;
         add_job(jobs, &dummy_job);
         jobs->terminate = TRUE;
-        pthread_cond_signal(&jobs->work_added);
-        pthread_mutex_unlock(&jobs->jobs_lock);
+        pthread_cond_broadcast(&worker_params[i].work_added);
+        pthread_mutex_unlock(&worker_params[i].jobs_lock);*/
     }
     
 
