@@ -13,6 +13,10 @@
 
 #define MAX_WORKER_QUEUE_CAPACITY 5
 
+#define NODE_SELECT_SEQUENTIAL 1
+#define NODE_SELECT_RANDOM 2
+#define NODE_SELECT_SHORTEST_QUEUE 3
+
 // defining function pointer with void return and no arguments provided
 typedef void (*JobFunction)();
 
@@ -59,6 +63,7 @@ void dummy_job();
 void dummy_job2();
 JobFunction remove_job(Jobs * jobs);
 int add_job(Jobs * jobs, JobFunction job_function);
+int add_jobs(Jobs * jobs, JobFunction * multiple_jobs, int num_to_add);
 void * worker_node(void * params);
 void init_worker_param(WorkerParams * worker_param, int thread_id);
 void launch_master_node(int num_workers);
