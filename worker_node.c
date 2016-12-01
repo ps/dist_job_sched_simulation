@@ -14,13 +14,23 @@ void * worker_node(void * params) {
         while(jobs->size == 0 && jobs->terminate == FALSE) {
             pthread_cond_wait(work_added, jobs_lock);
         }
+        //printf("Node id %i job queue %i\n", thread_id, jobs->size);
         int terminate = jobs->terminate;
         JobFunction job = remove_job(jobs);
         int num_jobs_remaining = jobs->size;
         pthread_mutex_unlock(jobs_lock);
-        printf("Node id %i received job, about to process\n", thread_id);
-        job();
-        printf("Node id %i FINISHED JOB\n", thread_id);
+
+        if(job != NULL) {
+            printf("Node id %i received job, about to process\n", thread_id);
+            job();
+            printf("Node id %i FINISHED JOB\n", thread_id);
+        } else {
+            if(num_jobs_remaining != 0) {
+               printf("UNEXPECTED ERROR: Node %i has NULL job with queue size %i\n", thread_id, num_jobs_remaining);
+                pthread_exit((void *)NULL); 
+            }
+        }
+
         if(num_jobs_remaining == 0 && terminate == TRUE) {
             break;
         }
