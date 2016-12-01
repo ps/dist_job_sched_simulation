@@ -1,9 +1,23 @@
 #include "job_simulation.h"
 
-void print_selected_parameters_message(int node_selection_strategy, int job_assignment_strategy) {
+void print_selected_parameters_message(int node_selection_strategy, int job_assignment_strategy, int job_type) {
     printf("====================================\n");
     printf("Number of jobs to distribute: %i\n", NUM_JOBS_TO_DISTRIBUTE);
     printf("Worker queue capacity: %i\n", MAX_WORKER_QUEUE_CAPACITY);
+    printf("Type of jobs being ran by workers: ");
+    if(job_type == VARIED_JOB) {
+        printf("VARIED");
+    } else if (job_type == LARGE_JOB) {
+        printf("LARGE");
+    } else if (job_type == MID_JOB) {
+        printf("MID");
+    } else if (job_type == SMALL_JOB) {
+        printf("SMALL");
+    } else {
+        printf("ERROR");
+    }
+    printf(" jobs\n");
+
     printf("Worker node selection strategy: ");
     if(node_selection_strategy == NODE_SELECT_SEQUENTIAL) {
         printf("SEQUENTIAL");
@@ -35,11 +49,12 @@ int main(int argc, char ** argv) {
     int num_workers = 3;
     int node_selection_strategy = NODE_SELECT_SEQUENTIAL;
     int job_assignment_strategy = LINEAR_JOB_ASSIGNMENT_STRATEGY;
+    int job_type = SMALL_JOB;
 
-    print_selected_parameters_message(node_selection_strategy, job_assignment_strategy);
+    print_selected_parameters_message(node_selection_strategy, job_assignment_strategy, job_type);
 
 
-    launch_master_node(num_workers, node_selection_strategy, job_assignment_strategy);
+    launch_master_node(num_workers, node_selection_strategy, job_assignment_strategy, job_type);
     /*int i;
     int k = 0;
     long start = usecs();
@@ -48,5 +63,32 @@ int main(int argc, char ** argv) {
     }
     long end = usecs();
     long diff = end - start;
-    printf("took %li ms = %lf sec\n", diff, ms_to_sec(diff));*/
+    printf("1 full took %li ms = %lf sec\n", diff, ms_to_sec(diff));
+
+    start = usecs();
+    for(i = 0; i < INT_MAX; i++) {
+        k += 1;
+    }
+    for(i = 0; i < INT_MAX; i++) {
+        k += 1;
+    }
+    end = usecs();
+    diff = end - start;
+    printf("2 full took %li ms = %lf sec\n", diff, ms_to_sec(diff));
+
+    start = usecs();
+    for(i = 0; i < INT_MAX / 2; i++) {
+        k += 1;
+    }
+    end = usecs();
+    diff = end - start;
+    printf("1/2 full took %li ms = %lf sec\n", diff, ms_to_sec(diff));
+
+    start = usecs();
+    for(i = 0; i < INT_MAX / 4; i++) {
+        k += 1;
+    }
+    end = usecs();
+    diff = end - start;
+    printf("1/4 full took %li ms = %lf sec\n", diff, ms_to_sec(diff));*/
 }

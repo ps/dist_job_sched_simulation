@@ -1,7 +1,6 @@
 #include "job_simulation.h"
 
-
-int select_worker_node(WorkerParams * worker_params, int num_workers, int previous_selection, int selection_strategy) {
+int select_worker_node(WorkerParams * worker_params, int num_workers, int previous_selection, int selection_strategy, int master_thread_id) {
     if(selection_strategy == NODE_SELECT_SEQUENTIAL) {
         if(previous_selection < 0) {
             previous_selection = 0;
@@ -10,9 +9,8 @@ int select_worker_node(WorkerParams * worker_params, int num_workers, int previo
         }
         return (previous_selection == num_workers - 1 ? 0 : previous_selection + 1);
     } else if(selection_strategy == NODE_SELECT_RANDOM) {
-        // while 'rand' is not thread safe, this function is called by master node only hence
-        // there is no cross thread worry
-        return rand() % num_workers;
+        // since
+        return get_rand(master_thread_id) % num_workers;
     } else if (selection_strategy == NODE_SELECT_SHORTEST_QUEUE) {
         int shortest_queue_size = INT_MAX;
         int node_index = 0;
@@ -84,21 +82,13 @@ int get_job_distribution_chunk(int previous_chunk_size, int previous_distributio
     return -1;
 }
 
-// TODO: this will end up being varied to different job types
-JobFunction * get_job_functions(int num) {
-    JobFunction * job_functions = (JobFunction *)malloc(sizeof(JobFunction) * num);
-    int i;
-    for(i = 0; i < num; i++) {
-        job_functions[i] = &dummy_job;
-    }
-    return job_functions;
-}
-
 /*
     The idea will be to in a retry loop first select node to give job, then try to add, if fail
     repeat this cycle until success
 */
-void launch_master_node(int num_workers, int node_selection_strategy, int job_assignment_strategy) {
+void launch_master_node(int num_workers, int node_selection_strategy, int job_assignment_strategy, int job_type) {
+    // Note: since worker threads are indexed 0 through n, use -1 for master thread
+    int master_thread_id = -1;
     pthread_t * worker = (pthread_t *)malloc(sizeof(pthread_t) * num_workers);
     WorkerParams * worker_params = (WorkerParams *)malloc(sizeof(WorkerParams) * num_workers);
     printf("Master about to launch slaves.\n"); 
@@ -126,32 +116,36 @@ void launch_master_node(int num_workers, int node_selection_strategy, int job_as
             job_chunk_size = jobs_remaining;
         }
 
-        JobFunction * job_functions = get_job_functions(job_chunk_size);
+        JobData * jobs_to_give = generate_job_nodes(job_chunk_size, job_type, master_thread_id);
         int iteration = 0;
         while(job_distribution_succeeded == FALSE && iteration < cycle_length) {
-            node_index = select_worker_node(worker_params, num_workers, node_index, node_selection_strategy);
+            node_index = select_worker_node(worker_params, num_workers, node_index, node_selection_strategy, master_thread_id);
 
-            WorkerParams selected_node_params = worker_params[node_index];
             printf("Attempting to add %i jobs to node %i \n", job_chunk_size, node_index);
-            pthread_mutex_lock(&selected_node_params.jobs_lock);
-            Jobs * jobs = selected_node_params.jobs;
+            pthread_mutex_lock(&worker_params[node_index].jobs_lock);
+            Jobs * jobs = worker_params[node_index].jobs;
 
-            job_distribution_succeeded = add_jobs(jobs, job_functions, job_chunk_size);
+            job_distribution_succeeded = add_jobs(jobs, jobs_to_give, job_chunk_size);
             if(job_distribution_succeeded == TRUE) {
                 printf("Job added to node %i, queue_size: %i\n", node_index, jobs->size);
             } else {
                 printf("Job NOT added to node %i, queue_size: %i\n", node_index, jobs->size);
             }
-            pthread_cond_broadcast(&selected_node_params.work_added);
-            pthread_mutex_unlock(&selected_node_params.jobs_lock);
+            pthread_cond_broadcast(&worker_params[node_index].work_added);
+            pthread_mutex_unlock(&worker_params[node_index].jobs_lock);
 
             iteration++;
+        }
+
+        // since job distribution failed, might as well give up CPU for others
+        if(job_distribution_succeeded == FALSE) {
+            sched_yield();
         }
 
         if(job_distribution_succeeded == TRUE) {
             jobs_remaining = jobs_remaining - job_chunk_size;
         }
-        free(job_functions);
+        free(jobs_to_give);
     }
 
     // terminate all workers
@@ -169,6 +163,7 @@ void launch_master_node(int num_workers, int node_selection_strategy, int job_as
         pthread_join(worker[i], NULL);
         printf("Printing log for thread id %i\n", i);
         print_log(worker_params[i].log);
+        free(worker_params[i].jobs);
         free_log(worker_params[i].log);
     }
     

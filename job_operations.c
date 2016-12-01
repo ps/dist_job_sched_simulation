@@ -1,7 +1,38 @@
 #include "job_simulation.h"
 
+double get_job_scale_factor(int job_type, int thread_id) {
+    double job_scales[3];
+    job_scales[0] = 1;
+    job_scales[1] = 0.5;
+    job_scales[2] = 0.25;
+
+    if(job_type == VARIED_JOB) {
+        int index = get_rand(thread_id) % 3;
+        return job_scales[index];
+    } else if (job_type == LARGE_JOB) {
+        return job_scales[0];
+    } else if (job_type == MID_JOB) {
+        return job_scales[1];
+    } else if (job_type == SMALL_JOB) {
+        return job_scales[2];
+    }
+    // if incorrect scale passed, give small job
+    return job_scales[2];
+}
+
+JobData * generate_job_nodes(int num, int job_type, int thread_id) {
+    JobData * jobs = (JobData *)malloc(sizeof(JobData) * num);
+    int i;
+    for(i = 0; i < num; i++) {
+        jobs[i].job_parameter = get_job_scale_factor(job_type, thread_id);
+        jobs[i].job_function = &sample_job;
+        jobs[i].empty = FALSE;
+    }
+    return jobs;
+}
+
 // IMPORTANT: make sure job lock is held before using this function
-int add_jobs(Jobs * jobs, JobFunction * multiple_jobs, int num_to_add) {
+int add_jobs(Jobs * jobs, JobData * multiple_jobs, int num_to_add) {
     int num_spots_available = jobs->max_capacity - jobs->size;
     if(num_spots_available < num_to_add) {
         return FALSE;
@@ -20,13 +51,14 @@ int add_jobs(Jobs * jobs, JobFunction * multiple_jobs, int num_to_add) {
 // IMPORTANT: make sure job lock is held before using this function
 // Adds to end of the Jobs list
 // returns FALSE if job was not added, TRUE otherwise
-int add_job(Jobs * jobs, JobFunction job_function) {
+int add_job(Jobs * jobs, JobData job_data) {
     // max capacity reached can't add more jobs
     if(jobs->size == jobs->max_capacity) {
         return FALSE;
     }
     JobNode * new_job = (JobNode *)malloc(sizeof(JobNode));
-    new_job->job_function = job_function;
+    new_job->job_data = job_data;
+
 
     new_job->next = NULL;
     if(jobs->last_job != NULL) {
@@ -42,7 +74,9 @@ int add_job(Jobs * jobs, JobFunction job_function) {
 }
 
 // IMPORTANT: make sure job lock is held before using this function
-JobFunction remove_job(Jobs * jobs) {
+JobData remove_job(Jobs * jobs) {
+    JobData removed_job;
+    removed_job.empty = TRUE;
     if(jobs->size != 0) {
         // fetch job node to return
         JobNode * job_node = jobs->next_job;
@@ -54,10 +88,12 @@ JobFunction remove_job(Jobs * jobs) {
             jobs->last_job = NULL;
         }
 
-        JobFunction job_function = job_node->job_function;
-        free(job_node);
+        // adjust size
         jobs->size--;
-        return job_function;
+
+        removed_job = job_node->job_data;
+
+        free(job_node);
     }
-    return NULL;
+    return removed_job;
 }

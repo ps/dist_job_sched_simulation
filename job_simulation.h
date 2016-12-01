@@ -4,15 +4,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <sched.h> // for sched_yield()
 #include <stddef.h> // for NULL
 #include <sys/time.h>
+#include <time.h>
 #include <unistd.h> // for sleep
 #include <limits.h> // max int size
 
 #define TRUE 1
 #define FALSE 0
 
-#define MAX_WORKER_QUEUE_CAPACITY 16
+#define MAX_WORKER_QUEUE_CAPACITY 2
 
 #define NODE_SELECT_SEQUENTIAL 111
 #define NODE_SELECT_RANDOM 222
@@ -28,12 +30,23 @@
 // used 
 #define NUM_JOBS_TO_DISTRIBUTE 30
 
+#define LARGE_JOB 99
+#define MID_JOB 88
+#define SMALL_JOB 77
+#define VARIED_JOB 66
+
 // defining function pointer with void return and no arguments provided
-typedef void (*JobFunction)();
+typedef void (*JobFunction)(double);
+
+typedef struct JobData {
+    int empty;
+    double job_parameter;
+    JobFunction job_function;    
+} JobData;
 
 typedef struct JobNode {
     struct JobNode * next;
-    JobFunction job_function;    
+    JobData job_data;
 } JobNode;
 
 typedef struct Jobs {
@@ -71,12 +84,14 @@ void free_log(Log * log);
 void log_message(Log * log, int msg_id);
 long usecs();
 double ms_to_sec(long ms);
-void dummy_job();
-void dummy_job2();
-JobFunction remove_job(Jobs * jobs);
-int add_job(Jobs * jobs, JobFunction job_function);
-int add_jobs(Jobs * jobs, JobFunction * multiple_jobs, int num_to_add);
+int get_rand(int thread_id);
+void sample_job(double job_scale);
+JobData remove_job(Jobs * jobs);
+int add_job(Jobs * jobs, JobData job_data);
+int add_jobs(Jobs * jobs, JobData * multiple_jobs, int num_to_add);
+JobData * generate_job_nodes(int num, int job_type, int thread_id);
 void * worker_node(void * params);
 void init_worker_param(WorkerParams * worker_param, int thread_id);
-void launch_master_node(int num_workers, int node_selection_strategy, int job_assignment_strategy);
+void launch_master_node(int num_workers, int node_selection_strategy, 
+    int job_assignment_strategy, int job_type);
 #endif
