@@ -15,12 +15,12 @@ void sample_job(double job_scale) {
 	}
 	// 4 * 100000 ~ 0.4mb
 	// 4 * 2147483 ~ 8.6mb
-	int array_size = 2147483 * job_scale; 
-	array_size = 100000; 
+	//int array_size = 2147483 * job_scale; 
+	int array_size = 100000; 
 	int iterations = 2000 - job_scale;
 	double * data = (double *)malloc(sizeof(double) * array_size);
 	clear_array(data, array_size);
-    volatile int i, j, k;
+    volatile int i, k;
     volatile double q = 34.5 * job_scale;
     volatile double z = -23.2 + job_scale;
     //volatile int loop_bound = (int) INT_MAX * job_scale;

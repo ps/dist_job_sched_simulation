@@ -1,3 +1,5 @@
 *.o
 *.swp
+*.png
+*.dat
 job_simulation

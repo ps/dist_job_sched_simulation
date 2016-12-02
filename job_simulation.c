@@ -74,4 +74,5 @@ int main(int argc, char ** argv) {
     end = usecs();
     diff = end - start;
     printf("LARGE: 1 full took %li ms = %lf sec\n", diff, ms_to_sec(diff));
+    return 0;
 }

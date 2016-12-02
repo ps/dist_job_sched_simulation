@@ -15,6 +15,9 @@ void * worker_node(void * params) {
         while(jobs->size == 0 && jobs->terminate == FALSE) {
             pthread_cond_wait(work_added, jobs_lock);
         }
+        // NOTE: IF THERE ARE ISSUES THIS COULD BE THE CAUSE
+        log_message(log, WORKER_QUEUE_SIZE_MSG, jobs->size);
+        
         //printf("Node id %i job queue %i\n", thread_id, jobs->size);
         int terminate = jobs->terminate;
         JobData job_data = remove_job(jobs);

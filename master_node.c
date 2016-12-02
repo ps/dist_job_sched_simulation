@@ -33,6 +33,7 @@ int select_worker_node(WorkerParams * worker_params, int num_workers, int previo
 Log * init_log() {
     Log * log = (Log *)malloc(sizeof(Log));
     log->log_msg = NULL;
+    log->first_log_timestamp = 0;
     pthread_mutex_init(&log->log_lock, NULL);
     return log;
 }
@@ -94,6 +95,7 @@ int get_job_distribution_chunk(int previous_chunk_size, int previous_distributio
 */
 void launch_master_node(int num_workers, int node_selection_strategy, int job_assignment_strategy, int job_type) {
     // Note: since worker threads are indexed 0 through n, use -1 for master thread
+    unsigned long relative_start_timestamp = usecs();
     int master_thread_id = -1;
     pthread_t * worker = (pthread_t *)malloc(sizeof(pthread_t) * num_workers);
     WorkerParams * worker_params = (WorkerParams *)malloc(sizeof(WorkerParams) * num_workers);
@@ -119,14 +121,28 @@ void launch_master_node(int num_workers, int node_selection_strategy, int job_as
     // in random terms or shortest queue first terms I decided to define it as attempting as many
     // tries as there are workers available
     int cycle_length = num_workers;
+    int first = TRUE;
+
+    unsigned long timestamp = 0, temp_timestamp = 0;
     while(jobs_remaining > 0) {
-        printf("Jobs remaining: %i\n", jobs_remaining);
+        //printf("Jobs remaining: %i\n", jobs_remaining);
         job_chunk_size = get_job_distribution_chunk(job_chunk_size, job_distribution_succeeded, job_assignment_strategy);
+        if(first) {
+            printf("first: %i\n", job_chunk_size);
+            first = FALSE;
+        }
         // reset distribution success
         job_distribution_succeeded = FALSE;
         if(job_chunk_size > jobs_remaining) {
             job_chunk_size = jobs_remaining;
         }
+
+        // this will decrease the number of messages produced
+        temp_timestamp = usecs();
+        if(temp_timestamp - timestamp > 5) {
+            log_message(master_log, JOB_ASSIGNMENT_RATE_MSG, job_chunk_size);
+        }
+        timestamp = temp_timestamp;
 
         JobData * jobs_to_give = generate_job_nodes(job_chunk_size, job_type, master_thread_id);
         int iteration = 0;
@@ -174,12 +190,13 @@ void launch_master_node(int num_workers, int node_selection_strategy, int job_as
     printf("Master joining on workers.\n");
     for(i = 0; i < num_workers; i++) {
         pthread_join(worker[i], NULL);
-        printf("Printing log for thread id %i\n", i);
-        print_log(worker_params[i].log, i);
+        printf("\nPrinting log for thread id %i\n", i);
+        print_log(worker_params[i].log, i, FALSE, FALSE, relative_start_timestamp);
         free(worker_params[i].jobs);
         free_log(worker_params[i].log);
     }
-    print_log(master_log, master_thread_id);
+    printf("\nPrinting log for thread id %i (master)\n", master_thread_id);
+    print_log(master_log, master_thread_id, FALSE, TRUE, relative_start_timestamp);
     free_log(master_log);
     
     free(worker);

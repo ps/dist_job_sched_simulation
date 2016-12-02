@@ -15,7 +15,7 @@
 #define FALSE 0
 #define NO_DATA INT_MIN
 
-#define MAX_WORKER_QUEUE_CAPACITY 2
+#define MAX_WORKER_QUEUE_CAPACITY 5
 
 #define NODE_SELECT_SEQUENTIAL 111
 #define NODE_SELECT_RANDOM 222
@@ -29,7 +29,7 @@
 #define CONSTANT_JOB_CHUNK_SIZE 2
 
 // used 
-#define NUM_JOBS_TO_DISTRIBUTE 30
+#define NUM_JOBS_TO_DISTRIBUTE 20
 
 #define LARGE_JOB 0
 #define MID_JOB 1000
@@ -92,6 +92,8 @@ typedef struct LogNode {
 typedef struct Log {
     pthread_mutex_t log_lock;
     LogNode * log_msg;
+    unsigned long first_log_timestamp;
+    unsigned long last_log_timestamp;
 } Log;
 
 typedef struct WorkerParams {
@@ -103,7 +105,8 @@ typedef struct WorkerParams {
 } WorkerParams;
 
 
-void print_log(Log * log, int thread_id);
+void print_log(Log * log, int thread_id, int stdout, 
+    int master, unsigned long relative_start);
 void free_log(Log * log);
 void log_message(Log * log, int msg_id, int data);
 long usecs();
