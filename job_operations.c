@@ -2,9 +2,9 @@
 
 double get_job_scale_factor(int job_type, int thread_id) {
     double job_scales[3];
-    job_scales[0] = 1;
-    job_scales[1] = 0.5;
-    job_scales[2] = 0.25;
+    job_scales[0] = LARGE_JOB;
+    job_scales[1] = MID_JOB;
+    job_scales[2] = SMALL_JOB;
 
     if(job_type == VARIED_JOB) {
         int index = get_rand(thread_id) % 3;

@@ -13,6 +13,7 @@
 
 #define TRUE 1
 #define FALSE 0
+#define NO_DATA INT_MIN
 
 #define MAX_WORKER_QUEUE_CAPACITY 2
 
@@ -30,10 +31,32 @@
 // used 
 #define NUM_JOBS_TO_DISTRIBUTE 30
 
-#define LARGE_JOB 99
-#define MID_JOB 88
-#define SMALL_JOB 77
+#define LARGE_JOB 0
+#define MID_JOB 1000
+#define SMALL_JOB 1500
 #define VARIED_JOB 66
+
+// log message identifications
+/*
+    Stores the assignment rate/size at current timestamp.
+*/
+#define JOB_ASSIGNMENT_RATE_MSG 444
+/*
+    Stores time at which master/worker started processing.
+*/
+#define START_PROCESSING_MSG 555
+/*
+    Stores time at wchich master/worker ended processing.
+*/
+#define END_PROCESSING_MSG 666
+/*
+    Stores the queue size of worker at current timestamp.
+*/
+#define WORKER_QUEUE_SIZE_MSG 777
+/*
+    Stores the sleep time in microseconds of worker.
+*/
+#define WORKER_SLEEP_TIME_MSG 888
 
 // defining function pointer with void return and no arguments provided
 typedef void (*JobFunction)(double);
@@ -61,6 +84,7 @@ typedef struct Jobs {
 
 typedef struct LogNode {
     struct LogNode * next;
+    int data;
     int msg_id;
     unsigned long timestamp;
 } LogNode;
@@ -79,9 +103,9 @@ typedef struct WorkerParams {
 } WorkerParams;
 
 
-void print_log(Log * log);
+void print_log(Log * log, int thread_id);
 void free_log(Log * log);
-void log_message(Log * log, int msg_id);
+void log_message(Log * log, int msg_id, int data);
 long usecs();
 double ms_to_sec(long ms);
 int get_rand(int thread_id);

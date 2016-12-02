@@ -7,6 +7,7 @@ void * worker_node(void * params) {
     pthread_mutex_t * jobs_lock = &my_params->jobs_lock;
     pthread_cond_t * work_added = &my_params->work_added;
     printf("I am node id %i\n", thread_id);
+    log_message(log, START_PROCESSING_MSG, NO_DATA);
     while(TRUE) {
         pthread_mutex_lock(jobs_lock);
         Jobs * jobs = my_params->jobs;
@@ -36,11 +37,12 @@ void * worker_node(void * params) {
             break;
         }
     }
+    log_message(log, END_PROCESSING_MSG, NO_DATA);
 
     printf("Node id %i finished processing jobs and received terminate signal.\n", thread_id);
-    int i;
+    /*int i;
     for(i = 0; i < thread_id + 1; i++) {
         log_message(log, 1 + thread_id);
-    }
+    }*/
     pthread_exit((void *)NULL);
 }

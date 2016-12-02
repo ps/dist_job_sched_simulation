@@ -30,11 +30,14 @@ int select_worker_node(WorkerParams * worker_params, int num_workers, int previo
     return -1;
 }
 
-void init_worker_param(WorkerParams * worker_param, int thread_id) {
+Log * init_log() {
     Log * log = (Log *)malloc(sizeof(Log));
     log->log_msg = NULL;
     pthread_mutex_init(&log->log_lock, NULL);
-    
+    return log;
+}
+
+Jobs * init_jobs(WorkerParams * worker_param) {
     Jobs * jobs = (Jobs *)malloc(sizeof(Jobs));
     jobs->max_capacity = MAX_WORKER_QUEUE_CAPACITY;
     jobs->size = 0;
@@ -43,9 +46,12 @@ void init_worker_param(WorkerParams * worker_param, int thread_id) {
     jobs->last_job = NULL;
     pthread_mutex_init(&worker_param->jobs_lock, NULL);
     pthread_cond_init(&worker_param->work_added, NULL);
+    return jobs;
+}
 
-    worker_param->jobs = jobs;
-    worker_param->log = log;
+void init_worker_param(WorkerParams * worker_param, int thread_id) {
+    worker_param->jobs = init_jobs(worker_param);
+    worker_param->log = init_log();
     worker_param->thread_id = thread_id;
 }
 
@@ -91,6 +97,7 @@ void launch_master_node(int num_workers, int node_selection_strategy, int job_as
     int master_thread_id = -1;
     pthread_t * worker = (pthread_t *)malloc(sizeof(pthread_t) * num_workers);
     WorkerParams * worker_params = (WorkerParams *)malloc(sizeof(WorkerParams) * num_workers);
+    Log * master_log = init_log();
     printf("Master about to launch slaves.\n"); 
     int i;
     for(i = 0; i < num_workers; i++) {
@@ -98,6 +105,11 @@ void launch_master_node(int num_workers, int node_selection_strategy, int job_as
         pthread_create(&worker[i], NULL, &worker_node, (void *)&worker_params[i]);
     }
 
+    printf("Master waiting 1 second to give other threads chance to be spawned and scheduled.\n");
+    sleep(1);
+    printf("Master ready to begin job assignment.\n");
+
+    log_message(master_log, START_PROCESSING_MSG, NO_DATA);
     int jobs_remaining = NUM_JOBS_TO_DISTRIBUTE;
     int node_index = 0;
     // set to max int as job chunk size will end up being bounded to max worker queue size
@@ -121,16 +133,16 @@ void launch_master_node(int num_workers, int node_selection_strategy, int job_as
         while(job_distribution_succeeded == FALSE && iteration < cycle_length) {
             node_index = select_worker_node(worker_params, num_workers, node_index, node_selection_strategy, master_thread_id);
 
-            printf("Attempting to add %i jobs to node %i \n", job_chunk_size, node_index);
+            //printf("Attempting to add %i jobs to node %i \n", job_chunk_size, node_index);
             pthread_mutex_lock(&worker_params[node_index].jobs_lock);
             Jobs * jobs = worker_params[node_index].jobs;
 
             job_distribution_succeeded = add_jobs(jobs, jobs_to_give, job_chunk_size);
-            if(job_distribution_succeeded == TRUE) {
+            /*if(job_distribution_succeeded == TRUE) {
                 printf("Job added to node %i, queue_size: %i\n", node_index, jobs->size);
             } else {
                 printf("Job NOT added to node %i, queue_size: %i\n", node_index, jobs->size);
-            }
+            }*/
             pthread_cond_broadcast(&worker_params[node_index].work_added);
             pthread_mutex_unlock(&worker_params[node_index].jobs_lock);
 
@@ -156,16 +168,19 @@ void launch_master_node(int num_workers, int node_selection_strategy, int job_as
         pthread_cond_broadcast(&worker_params[i].work_added);
         pthread_mutex_unlock(&worker_params[i].jobs_lock);
     }
+    log_message(master_log, END_PROCESSING_MSG, NO_DATA);
     
 
     printf("Master joining on workers.\n");
     for(i = 0; i < num_workers; i++) {
         pthread_join(worker[i], NULL);
         printf("Printing log for thread id %i\n", i);
-        print_log(worker_params[i].log);
+        print_log(worker_params[i].log, i);
         free(worker_params[i].jobs);
         free_log(worker_params[i].log);
     }
+    print_log(master_log, master_thread_id);
+    free_log(master_log);
     
     free(worker);
     free(worker_params);

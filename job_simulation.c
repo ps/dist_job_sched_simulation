@@ -55,40 +55,23 @@ int main(int argc, char ** argv) {
 
 
     launch_master_node(num_workers, node_selection_strategy, job_assignment_strategy, job_type);
-    /*int i;
-    int k = 0;
+
     long start = usecs();
-    for(i = 0; i < INT_MAX; i++) {
-        k += 1;
-    }
+    sample_job(SMALL_JOB);
     long end = usecs();
     long diff = end - start;
-    printf("1 full took %li ms = %lf sec\n", diff, ms_to_sec(diff));
+    printf("SMALL: 1/4 full took %li ms = %lf sec\n", diff, ms_to_sec(diff));
+
 
     start = usecs();
-    for(i = 0; i < INT_MAX; i++) {
-        k += 1;
-    }
-    for(i = 0; i < INT_MAX; i++) {
-        k += 1;
-    }
+    sample_job(MID_JOB);
     end = usecs();
     diff = end - start;
-    printf("2 full took %li ms = %lf sec\n", diff, ms_to_sec(diff));
+    printf("MID: 1/2 full took %li ms = %lf sec\n", diff, ms_to_sec(diff));
 
     start = usecs();
-    for(i = 0; i < INT_MAX / 2; i++) {
-        k += 1;
-    }
+    sample_job(LARGE_JOB);
     end = usecs();
     diff = end - start;
-    printf("1/2 full took %li ms = %lf sec\n", diff, ms_to_sec(diff));
-
-    start = usecs();
-    for(i = 0; i < INT_MAX / 4; i++) {
-        k += 1;
-    }
-    end = usecs();
-    diff = end - start;
-    printf("1/4 full took %li ms = %lf sec\n", diff, ms_to_sec(diff));*/
+    printf("LARGE: 1 full took %li ms = %lf sec\n", diff, ms_to_sec(diff));
 }
