@@ -121,3 +121,15 @@ JobData remove_job(Jobs * jobs) {
     }
     return removed_job;
 }
+
+Jobs * init_jobs(WorkerParams * worker_param) {
+    Jobs * jobs = (Jobs *)malloc(sizeof(Jobs));
+    jobs->max_capacity = MAX_WORKER_QUEUE_CAPACITY;
+    jobs->size = 0;
+    jobs->terminate = FALSE;
+    jobs->next_job = NULL;
+    jobs->last_job = NULL;
+    pthread_mutex_init(&worker_param->jobs_lock, NULL);
+    pthread_cond_init(&worker_param->work_added, NULL);
+    return jobs;
+}

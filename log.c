@@ -1,6 +1,11 @@
 #include "job_simulation.h"
 
-void print_log(Log * log, int thread_id, int stdout, int master, unsigned long relative_start) {
+void print_log(Log * log, int thread_id, unsigned long relative_start) {
+    int master = FALSE;
+    if (thread_id == MASTER_THREAD_ID) {
+        master = TRUE;
+    }
+    int stdout = PRINT_LOG_TO_STDOUT;
     char str[500];
     LogNode * log_node = log->log_msg;
     unsigned long start = 0, end = 0, diff = 1;
@@ -74,4 +79,12 @@ void log_message(Log * log, int msg_id, int data) {
     log_node->next = log->log_msg;
     log->log_msg = log_node;
     pthread_mutex_unlock(&log->log_lock);
+}
+
+Log * init_log() {
+    Log * log = (Log *)malloc(sizeof(Log));
+    log->log_msg = NULL;
+    log->first_log_timestamp = 0;
+    pthread_mutex_init(&log->log_lock, NULL);
+    return log;
 }

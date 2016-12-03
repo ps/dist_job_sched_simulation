@@ -29,26 +29,6 @@ int select_worker_node(WorkerParams * worker_params, int num_workers, int previo
     return -1;
 }
 
-Log * init_log() {
-    Log * log = (Log *)malloc(sizeof(Log));
-    log->log_msg = NULL;
-    log->first_log_timestamp = 0;
-    pthread_mutex_init(&log->log_lock, NULL);
-    return log;
-}
-
-Jobs * init_jobs(WorkerParams * worker_param) {
-    Jobs * jobs = (Jobs *)malloc(sizeof(Jobs));
-    jobs->max_capacity = MAX_WORKER_QUEUE_CAPACITY;
-    jobs->size = 0;
-    jobs->terminate = FALSE;
-    jobs->next_job = NULL;
-    jobs->last_job = NULL;
-    pthread_mutex_init(&worker_param->jobs_lock, NULL);
-    pthread_cond_init(&worker_param->work_added, NULL);
-    return jobs;
-}
-
 void init_worker_param(WorkerParams * worker_param, int thread_id) {
     worker_param->jobs = init_jobs(worker_param);
     worker_param->log = init_log();
@@ -109,7 +89,7 @@ void terminate_workers(int num_workers, WorkerParams * worker_params) {
 
 void print_and_free_log(Log * log, int thread_id, unsigned long relative_start_timestamp) {
     printf("\nLog for thread id %i\n", thread_id);
-    print_log(log, thread_id, FALSE, FALSE, relative_start_timestamp);
+    print_log(log, thread_id, relative_start_timestamp);
     free_log(log);
 }
 
@@ -136,7 +116,7 @@ void init_master_data(int num_workers,
     int * master_thread_id, pthread_t ** worker, WorkerParams ** worker_params, Log ** master_log) {
 
     // Note: since worker threads are indexed 0 through n, use -1 for master thread
-    *master_thread_id = -1;
+    *master_thread_id = MASTER_THREAD_ID;
     *worker = (pthread_t *)malloc(sizeof(pthread_t) * num_workers);
     *worker_params = (WorkerParams *)malloc(sizeof(WorkerParams) * num_workers);
     *master_log = init_log();

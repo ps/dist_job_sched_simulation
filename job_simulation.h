@@ -4,18 +4,36 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
-#include <sched.h> // for sched_yield()
-#include <stddef.h> // for NULL
+/*
+    Needed for sched_yield()
+*/
+#include <sched.h>
+/*
+    Defines NULL macro
+*/
+#include <stddef.h> 
 #include <sys/time.h>
 #include <time.h>
-#include <unistd.h> // for sleep
-#include <limits.h> // max int size
+/*
+    For integer limits
+*/
+#include <limits.h> 
 
 /***************************
 **********CONSTANTS*********
 ****************************/
 #define TRUE 1
 #define FALSE 0
+
+/*
+    Defines whether log printed to stdout vs file.
+*/
+#define PRINT_LOG_TO_STDOUT FALSE
+
+/*
+    Since worker threads are indexed 0 through n, use -1 for master thread 
+*/
+#define MASTER_THREAD_ID -1
 
 /*
     Used to specify that there is no data.
@@ -193,26 +211,131 @@ typedef struct WorkerParams {
 ******************************************/
 
 /*****************************************
-**************FUNCTION HEADERS************
+**************LOG OPERATIONS HEADERS******
 ******************************************/
-void print_log(Log * log, int thread_id, int stdout, 
-    int master, unsigned long relative_start);
-int get_job_frequency(int job_type);
+/*
+    Prints data in the provided log.
+*/
+void print_log(Log * log, int thread_id, unsigned long relative_start);
+
+/*
+    Initializes log.
+*/
+Log * init_log();
+
+/*
+    Frees log.
+*/
 void free_log(Log * log);
+
+/*
+    Logs message.
+*/
 void log_message(Log * log, int msg_id, int data);
-long usecs();
-double ms_to_sec(long ms);
-int get_rand(int thread_id);
-void sample_job(double job_scale);
-JobData remove_job(Jobs * jobs);
+/*****************************************
+**************LOG OPERATIONS HEADERS******
+******************************************/
+
+/*****************************************
+**************JOB OPERATIONS HEADERS******
+******************************************/
+/*
+    After simulation is ran, use this function to 
+    get the data on how many times each job type was
+    ran. This is mainly serves the purpose to figure out
+    how many types of each job VARIED setting ran.
+*/
+int get_job_frequency(int job_type);
+
+/*
+    Add one job to provided queue. 
+    IMPORANT! Make sure job lock is held before calling this function.
+*/
 int add_job(Jobs * jobs, JobData job_data);
+
+/*
+    Add multiple jobs to provided queue. 
+    IMPORANT! Make sure job lock is held before calling this function.
+*/
 int add_jobs(Jobs * jobs, JobData * multiple_jobs, int num_to_add);
+
+/*
+    Initialize jobs inside of WorkerParams. Used by master thread
+    to setup worker threads.
+*/
+Jobs * init_jobs(WorkerParams * worker_param);
+
+/*
+    Removes job from queue. Used by workers to get a job from
+    their queue.
+*/
+JobData remove_job(Jobs * jobs);
+
+/*
+    Generates jobs based on the provided parameters.
+*/
 JobData * generate_job_nodes(int num, int job_type, int thread_id);
+/*****************************************
+**************JOB OPERATIONS HEADERS******
+******************************************/
+
+/*****************************************
+************UTILS OPERATIONS HEADERS******
+******************************************/
+/*
+    Gets the current timestamp in microseconds.
+*/
+long usecs();
+
+/*
+    Converts microseconds to seconds.
+*/
+double ms_to_sec(long ms);
+
+/*
+    Thread safe random number generator.
+*/
+int get_rand(int thread_id);
+/*****************************************
+************UTILS OPERATIONS HEADERS******
+******************************************/
+
+/*****************************************
+*************JOBS OPERATIONS HEADERS******
+******************************************/
+/*
+    Job being ran by workers. Runtime depends on the
+    passed parameter. Expected parameters are the
+    ones specified by job types macros above.
+*/
+void sample_job(double job_scale);
+/*****************************************
+*************JOBS OPERATIONS HEADERS******
+******************************************/
+
+
+/*****************************************
+*************WORKER NODE HEADERS**********
+******************************************/
+/*
+    Worker thread function.
+*/
 void * worker_node(void * params);
-void init_worker_param(WorkerParams * worker_param, int thread_id);
+/*****************************************
+*************WORKER NODE HEADERS**********
+******************************************/
+
+
+/*****************************************
+*************MASTER NODE HEADERS**********
+******************************************/
+/*
+    Lanuches master node and thus begins
+    simulation.
+*/
 void launch_master_node(int num_workers, int node_selection_strategy, 
     int job_assignment_strategy, int job_type);
 /*****************************************
-**************FUNCTION HEADERS************
+*************MASTER NODE HEADERS**********
 ******************************************/
 #endif
