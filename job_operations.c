@@ -1,13 +1,34 @@
 #include "job_simulation.h"
 
-double get_job_scale_factor(int job_type, int thread_id) {
-    double job_scales[3];
-    job_scales[0] = LARGE_JOB;
-    job_scales[1] = MID_JOB;
-    job_scales[2] = SMALL_JOB;
+static int job_frequency[3] = {0, 0, 0};
+static double job_scales[3] = {LARGE_JOB, MID_JOB, SMALL_JOB};
 
+void increment_job_count(int job_type) {
+    if (job_type == LARGE_JOB) {
+        job_frequency[0]++;
+    } else if (job_type == MID_JOB) {
+        job_frequency[1]++;
+    } else if (job_type == SMALL_JOB) {
+        job_frequency[2]++;
+    }
+}
+
+int get_job_frequency(int job_type) {
+    if (job_type == LARGE_JOB) {
+        return job_frequency[0];
+    } else if (job_type == MID_JOB) {
+        return job_frequency[1];
+    } else if (job_type == SMALL_JOB) {
+        return job_frequency[2];
+    }
+    return -1;
+}
+
+double get_job_scale_factor(int job_type, int thread_id) {
     if(job_type == VARIED_JOB) {
-        int index = get_rand(thread_id) % 3;
+        int r = get_rand(thread_id);
+        int index = r % 3;
+        //printf("rand: %i index: %i\n", r, index);
         return job_scales[index];
     } else if (job_type == LARGE_JOB) {
         return job_scales[0];
@@ -56,6 +77,9 @@ int add_job(Jobs * jobs, JobData job_data) {
     if(jobs->size == jobs->max_capacity) {
         return FALSE;
     }
+
+    increment_job_count(job_data.job_parameter);
+
     JobNode * new_job = (JobNode *)malloc(sizeof(JobNode));
     new_job->job_data = job_data;
 

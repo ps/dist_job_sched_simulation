@@ -11,8 +11,12 @@ void * worker_node(void * params) {
     while(TRUE) {
         pthread_mutex_lock(jobs_lock);
         Jobs * jobs = my_params->jobs;
-        printf("Node id %i waiting for jobs.\n", thread_id);
+        int show = FALSE;
         while(jobs->size == 0 && jobs->terminate == FALSE) {
+            if(!show) {
+                show = TRUE;
+                printf("Node id %i waiting for jobs.\n", thread_id);
+            }
             pthread_cond_wait(work_added, jobs_lock);
         }
         // NOTE: IF THERE ARE ISSUES THIS COULD BE THE CAUSE

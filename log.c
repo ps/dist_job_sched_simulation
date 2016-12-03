@@ -5,9 +5,8 @@ void print_log(Log * log, int thread_id, int stdout, int master, unsigned long r
     LogNode * log_node = log->log_msg;
     unsigned long start = 0, end = 0, diff = 1;
     FILE * fp;
-    if(stdout) {
-        printf("Remember that logs are printed from last event to first event.\n");
-    } else {
+    printf("Remember that logs are printed from last event to first event.\n");
+    if(!stdout) {
         sprintf(str, "thread%i.dat", thread_id);
         fp = fopen(str, "ab+");
     }
@@ -28,24 +27,22 @@ void print_log(Log * log, int thread_id, int stdout, int master, unsigned long r
         if(stdout) {
             printf("msg: %i timestamp: %lu data: %i\n", msg_id, timestamp, data);
         } else {
+            // (real time, adjusted_time, data, message id)
             // separated via the if statements just in case the log messeges accidentally make into the improper log
             if(master && msg_id == JOB_ASSIGNMENT_RATE_MSG) {
-                // process master job assignment rate data for graph
-                // (real time, adjusted_time, data)
-                fprintf(fp, "%li, %li, %i\n", timestamp, timestamp - relative_start, data);
+                fprintf(fp, "%li, %li, %i, %i\n", timestamp, timestamp - relative_start, data, JOB_ASSIGNMENT_RATE_MSG);
+            } else if(master && msg_id == JOBS_REMAINING_MSG) {
+                fprintf(fp, "%li, %li, %i, %i\n", timestamp, timestamp - relative_start, data, JOBS_REMAINING_MSG);
             } else if (!master && msg_id == WORKER_QUEUE_SIZE_MSG) {
-                // process worker queue size data for graph
-                // (real time, adjusted_time, data)
-                fprintf(fp, "%li, %li, %i\n", timestamp, timestamp - relative_start, data);
+                fprintf(fp, "%li, %li, %i, %i\n", timestamp, timestamp - relative_start, data, WORKER_QUEUE_SIZE_MSG);
             }
         }
 
         log_node = log_node->next;
     }
     diff = end - start;
-    if(stdout) {
-        printf("Node %i processed for %li ms = %lf sec\n", thread_id, diff, ms_to_sec(diff));
-    } else {
+    printf("Node %i processed for %li ms = %lf sec\n", thread_id, diff, ms_to_sec(diff));
+    if(!stdout) {
         fclose(fp);
     }
 

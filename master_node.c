@@ -59,8 +59,8 @@ void init_worker_param(WorkerParams * worker_param, int thread_id) {
 int adjust_chunk_to_boundry(int chunk_size) {
     if(chunk_size <= 0) {
         return 1;
-    } else if(chunk_size > MAX_WORKER_QUEUE_CAPACITY) {
-        return MAX_WORKER_QUEUE_CAPACITY;
+    } else if(chunk_size > MAX_JOBS_ASSIGNMENT) {
+        return MAX_JOBS_ASSIGNMENT;
     }
     return chunk_size;
 }
@@ -89,13 +89,20 @@ int get_job_distribution_chunk(int previous_chunk_size, int previous_distributio
     return -1;
 }
 
+void imitate_network_delay(int master_thread_id) {
+    struct timespec ts;
+    ts.tv_sec = 0;
+    ts.tv_nsec = get_rand(master_thread_id) % 250000000;
+
+    nanosleep(&ts, NULL);
+}
+
 /*
     The idea will be to in a retry loop first select node to give job, then try to add, if fail
     repeat this cycle until success
 */
 void launch_master_node(int num_workers, int node_selection_strategy, int job_assignment_strategy, int job_type) {
     // Note: since worker threads are indexed 0 through n, use -1 for master thread
-    unsigned long relative_start_timestamp = usecs();
     int master_thread_id = -1;
     pthread_t * worker = (pthread_t *)malloc(sizeof(pthread_t) * num_workers);
     WorkerParams * worker_params = (WorkerParams *)malloc(sizeof(WorkerParams) * num_workers);
@@ -110,6 +117,7 @@ void launch_master_node(int num_workers, int node_selection_strategy, int job_as
     printf("Master waiting 1 second to give other threads chance to be spawned and scheduled.\n");
     sleep(1);
     printf("Master ready to begin job assignment.\n");
+    unsigned long relative_start_timestamp = usecs();
 
     log_message(master_log, START_PROCESSING_MSG, NO_DATA);
     int jobs_remaining = NUM_JOBS_TO_DISTRIBUTE;
@@ -123,8 +131,9 @@ void launch_master_node(int num_workers, int node_selection_strategy, int job_as
     int cycle_length = num_workers;
     int first = TRUE;
 
-    unsigned long timestamp = 0, temp_timestamp = 0;
     while(jobs_remaining > 0) {
+        log_message(master_log, JOBS_REMAINING_MSG, jobs_remaining);
+
         //printf("Jobs remaining: %i\n", jobs_remaining);
         job_chunk_size = get_job_distribution_chunk(job_chunk_size, job_distribution_succeeded, job_assignment_strategy);
         if(first) {
@@ -137,14 +146,12 @@ void launch_master_node(int num_workers, int node_selection_strategy, int job_as
             job_chunk_size = jobs_remaining;
         }
 
-        // this will decrease the number of messages produced
-        temp_timestamp = usecs();
-        if(temp_timestamp - timestamp > 5) {
-            log_message(master_log, JOB_ASSIGNMENT_RATE_MSG, job_chunk_size);
-        }
-        timestamp = temp_timestamp;
+        log_message(master_log, JOB_ASSIGNMENT_RATE_MSG, job_chunk_size);
 
         JobData * jobs_to_give = generate_job_nodes(job_chunk_size, job_type, master_thread_id);
+        
+        imitate_network_delay(master_thread_id);
+
         int iteration = 0;
         while(job_distribution_succeeded == FALSE && iteration < cycle_length) {
             node_index = select_worker_node(worker_params, num_workers, node_index, node_selection_strategy, master_thread_id);
@@ -198,6 +205,10 @@ void launch_master_node(int num_workers, int node_selection_strategy, int job_as
     printf("\nPrinting log for thread id %i (master)\n", master_thread_id);
     print_log(master_log, master_thread_id, FALSE, TRUE, relative_start_timestamp);
     free_log(master_log);
+
+    printf("Number of LARGE jobs: %i\n", get_job_frequency(LARGE_JOB));
+    printf("Number of MID jobs: %i\n", get_job_frequency(MID_JOB));
+    printf("Number of SMALL jobs: %i\n", get_job_frequency(SMALL_JOB));
     
     free(worker);
     free(worker_params);

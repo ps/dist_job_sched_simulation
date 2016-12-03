@@ -1,6 +1,7 @@
 #include "job_simulation.h"
 
-static unsigned int seed = 0;
+// for now, there wouldn't seem to be a point of running this app with 5000 threads 
+unsigned int seed[5001] = {0,0,0,0};
 
 // returns time since epoch in microseconds (10^6)
 long usecs() {
@@ -14,9 +15,10 @@ double ms_to_sec(long ms) {
 }
 
 int get_rand(int thread_id) {
-	if(seed == 0) {
-		seed = time(NULL);
+	if(seed[thread_id+1] == 0) {
+		seed[thread_id+1] = time(NULL) + thread_id + 1;
 	}
-	unsigned int thread_seed = seed + thread_id;
-	return rand_r(&thread_seed);
+	//unsigned int thread_seed = seed + thread_id;
+	//printf("thread seeed: %i\n", seed[thread_id + 1]);
+	return rand_r(&seed[thread_id + 1]);
 }
