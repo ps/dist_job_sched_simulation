@@ -6,7 +6,8 @@ void * worker_node(void * params) {
     Log * log = my_params->log;
     pthread_mutex_t * jobs_lock = &my_params->jobs_lock;
     pthread_cond_t * work_added = &my_params->work_added;
-    printf("I am node id %i\n", thread_id);
+    //printf("Node %i spawned.\n", thread_id);
+
     log_message(log, START_PROCESSING_MSG, NO_DATA);
     while(TRUE) {
         pthread_mutex_lock(jobs_lock);
@@ -15,7 +16,7 @@ void * worker_node(void * params) {
         while(jobs->size == 0 && jobs->terminate == FALSE) {
             if(!show) {
                 show = TRUE;
-                printf("Node id %i waiting for jobs.\n", thread_id);
+                //printf("Node id %i waiting for jobs.\n", thread_id);
             }
             pthread_cond_wait(work_added, jobs_lock);
         }
@@ -30,9 +31,9 @@ void * worker_node(void * params) {
 
         if(job_data.empty == FALSE) {
             JobFunction job = job_data.job_function;
-            printf("Node id %i received job, about to process\n", thread_id);
+            //printf("Node id %i received job, about to process\n", thread_id);
             job(job_data.job_parameter);
-            printf("Node id %i FINISHED JOB\n", thread_id);
+            //printf("Node id %i FINISHED JOB\n", thread_id);
         } else {
             if(num_jobs_remaining != 0) {
                 printf("UNEXPECTED ERROR: Node %i has NULL job with queue size %i\n", thread_id, num_jobs_remaining);
@@ -46,10 +47,7 @@ void * worker_node(void * params) {
     }
     log_message(log, END_PROCESSING_MSG, NO_DATA);
 
-    printf("Node id %i finished processing jobs and received terminate signal.\n", thread_id);
-    /*int i;
-    for(i = 0; i < thread_id + 1; i++) {
-        log_message(log, 1 + thread_id);
-    }*/
+    //printf("Node id %i finished processing jobs and received terminate signal.\n", thread_id);
+
     pthread_exit((void *)NULL);
 }

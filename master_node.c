@@ -9,7 +9,6 @@ int select_worker_node(WorkerParams * worker_params, int num_workers, int previo
         }
         return (previous_selection == num_workers - 1 ? 0 : previous_selection + 1);
     } else if(selection_strategy == NODE_SELECT_RANDOM) {
-        // since
         return get_rand(master_thread_id) % num_workers;
     } else if (selection_strategy == NODE_SELECT_SHORTEST_QUEUE) {
         int shortest_queue_size = INT_MAX;
@@ -97,25 +96,66 @@ void imitate_network_delay(int master_thread_id) {
     nanosleep(&ts, NULL);
 }
 
-/*
-    The idea will be to in a retry loop first select node to give job, then try to add, if fail
-    repeat this cycle until success
-*/
-void launch_master_node(int num_workers, int node_selection_strategy, int job_assignment_strategy, int job_type) {
-    // Note: since worker threads are indexed 0 through n, use -1 for master thread
-    int master_thread_id = -1;
-    pthread_t * worker = (pthread_t *)malloc(sizeof(pthread_t) * num_workers);
-    WorkerParams * worker_params = (WorkerParams *)malloc(sizeof(WorkerParams) * num_workers);
-    Log * master_log = init_log();
+void terminate_workers(int num_workers, WorkerParams * worker_params) {
+    int i;
+    for(i = 0; i < num_workers; i++) {
+        pthread_mutex_lock(&worker_params[i].jobs_lock);
+        Jobs * jobs = worker_params[i].jobs;
+        jobs->terminate = TRUE;
+        pthread_cond_broadcast(&worker_params[i].work_added);
+        pthread_mutex_unlock(&worker_params[i].jobs_lock);
+    }
+}
+
+void print_and_free_log(Log * log, int thread_id, unsigned long relative_start_timestamp) {
+    printf("\nLog for thread id %i\n", thread_id);
+    print_log(log, thread_id, FALSE, FALSE, relative_start_timestamp);
+    free_log(log);
+}
+
+void join_workers(int num_workers, pthread_t * worker, WorkerParams * worker_params, unsigned long relative_start_timestamp) {
+    printf("Master joining on workers.\n");
+    int i;
+    for(i = 0; i < num_workers; i++) {
+        pthread_join(worker[i], NULL);
+        print_and_free_log(worker_params[i].log, i, relative_start_timestamp);
+        free(worker_params[i].jobs);
+    }
+}
+
+void launch_workers(int num_workers, WorkerParams * worker_params, pthread_t * worker) {
     printf("Master about to launch slaves.\n"); 
     int i;
     for(i = 0; i < num_workers; i++) {
         init_worker_param(&worker_params[i], i);
         pthread_create(&worker[i], NULL, &worker_node, (void *)&worker_params[i]);
     }
+}
 
-    printf("Master waiting 1 second to give other threads chance to be spawned and scheduled.\n");
-    sleep(1);
+void init_master_data(int num_workers, 
+    int * master_thread_id, pthread_t ** worker, WorkerParams ** worker_params, Log ** master_log) {
+
+    // Note: since worker threads are indexed 0 through n, use -1 for master thread
+    *master_thread_id = -1;
+    *worker = (pthread_t *)malloc(sizeof(pthread_t) * num_workers);
+    *worker_params = (WorkerParams *)malloc(sizeof(WorkerParams) * num_workers);
+    *master_log = init_log();
+}
+
+/*
+    The idea will be to in a retry loop first select node to give job, then try to add, if fail
+    repeat this cycle until success
+*/
+void launch_master_node(int num_workers, int node_selection_strategy, int job_assignment_strategy, int job_type) {
+    
+    int master_thread_id;
+    pthread_t * worker;
+    WorkerParams * worker_params;
+    Log * master_log;
+    init_master_data(num_workers, &master_thread_id, &worker, &worker_params, &master_log);
+
+    launch_workers(num_workers, worker_params, worker);
+
     printf("Master ready to begin job assignment.\n");
     unsigned long relative_start_timestamp = usecs();
 
@@ -129,16 +169,14 @@ void launch_master_node(int num_workers, int node_selection_strategy, int job_as
     // in random terms or shortest queue first terms I decided to define it as attempting as many
     // tries as there are workers available
     int cycle_length = num_workers;
-    int first = TRUE;
 
     while(jobs_remaining > 0) {
         log_message(master_log, JOBS_REMAINING_MSG, jobs_remaining);
 
         //printf("Jobs remaining: %i\n", jobs_remaining);
         job_chunk_size = get_job_distribution_chunk(job_chunk_size, job_distribution_succeeded, job_assignment_strategy);
-        if(first) {
-            printf("first: %i\n", job_chunk_size);
-            first = FALSE;
+        if(jobs_remaining % 10 == 0) {
+            printf("Number of jobs remaining: %i\n", jobs_remaining);
         }
         // reset distribution success
         job_distribution_succeeded = FALSE;
@@ -183,28 +221,15 @@ void launch_master_node(int num_workers, int node_selection_strategy, int job_as
         free(jobs_to_give);
     }
 
-    // terminate all workers
-    for(i = 0; i < num_workers; i++) {
-        pthread_mutex_lock(&worker_params[i].jobs_lock);
-        Jobs * jobs = worker_params[i].jobs;
-        jobs->terminate = TRUE;
-        pthread_cond_broadcast(&worker_params[i].work_added);
-        pthread_mutex_unlock(&worker_params[i].jobs_lock);
-    }
+    terminate_workers(num_workers, worker_params);
+
     log_message(master_log, END_PROCESSING_MSG, NO_DATA);
     
+    // joins threads, prints log, cleans up worker allocated data
+    join_workers(num_workers, worker, worker_params, relative_start_timestamp);
 
-    printf("Master joining on workers.\n");
-    for(i = 0; i < num_workers; i++) {
-        pthread_join(worker[i], NULL);
-        printf("\nPrinting log for thread id %i\n", i);
-        print_log(worker_params[i].log, i, FALSE, FALSE, relative_start_timestamp);
-        free(worker_params[i].jobs);
-        free_log(worker_params[i].log);
-    }
-    printf("\nPrinting log for thread id %i (master)\n", master_thread_id);
-    print_log(master_log, master_thread_id, FALSE, TRUE, relative_start_timestamp);
-    free_log(master_log);
+    // prints master log
+    print_and_free_log(master_log, master_thread_id, relative_start_timestamp);
 
     printf("Number of LARGE jobs: %i\n", get_job_frequency(LARGE_JOB));
     printf("Number of MID jobs: %i\n", get_job_frequency(MID_JOB));
