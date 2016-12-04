@@ -150,12 +150,14 @@ void launch_master_node(int num_workers, int node_selection_strategy, int job_as
     // tries as there are workers available
     int cycle_length = num_workers;
 
+    int count = 0;
     while(jobs_remaining > 0) {
+        count++;
         log_message(master_log, JOBS_REMAINING_MSG, jobs_remaining);
 
         //printf("Jobs remaining: %i\n", jobs_remaining);
         job_chunk_size = get_job_distribution_chunk(job_chunk_size, job_distribution_succeeded, job_assignment_strategy);
-        if(jobs_remaining % 10 == 0) {
+        if(count % 10 == 0) {
             printf("Number of jobs remaining: %i\n", jobs_remaining);
         }
         // reset distribution success
