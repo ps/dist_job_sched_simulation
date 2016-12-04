@@ -13,6 +13,9 @@ void print_log(Log * log, int thread_id, unsigned long relative_start) {
     printf("Remember that logs are printed from last event to first event.\n");
     if(!stdout) {
         sprintf(str, "thread%i.dat", thread_id);
+        if(remove(str) == 0) {
+            printf("Removed old '%s'\n", str);
+        }
         fp = fopen(str, "ab+");
     }
     while(log_node != NULL) {

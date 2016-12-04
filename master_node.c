@@ -124,7 +124,7 @@ void init_master_data(int num_workers,
 
 typedef struct Node {
     unsigned long timestamp;
-    int data;
+    int size;
     struct Node * next;
 } Node;
 
