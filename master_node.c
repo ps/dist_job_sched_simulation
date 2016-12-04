@@ -122,6 +122,12 @@ void init_master_data(int num_workers,
     *master_log = init_log();
 }
 
+typedef struct Node {
+    unsigned long timestamp;
+    int data;
+    struct Node * next;
+} Node;
+
 /*
     The idea will be to in a retry loop first select node to give job, then try to add, if fail
     repeat this cycle until success
@@ -133,6 +139,7 @@ void launch_master_node(int num_workers, int node_selection_strategy, int job_as
     WorkerParams * worker_params;
     Log * master_log;
     init_master_data(num_workers, &master_thread_id, &worker, &worker_params, &master_log);
+    Node * master_size_log = NULL;
 
     launch_workers(num_workers, worker_params, worker);
 
@@ -157,23 +164,42 @@ void launch_master_node(int num_workers, int node_selection_strategy, int job_as
 
         //printf("Jobs remaining: %i\n", jobs_remaining);
         job_chunk_size = get_job_distribution_chunk(job_chunk_size, job_distribution_succeeded, job_assignment_strategy);
-        if(count % 10 == 0) {
-            printf("Number of jobs remaining: %i\n", jobs_remaining);
-        }
+
         // reset distribution success
         job_distribution_succeeded = FALSE;
         if(job_chunk_size > jobs_remaining) {
             job_chunk_size = jobs_remaining;
         }
 
+
+        // START SIZE LOG
+        Node * temp = (Node *)malloc(sizeof(Node));
+        temp->timestamp = usecs();
+        temp->size = jobs_remaining;
+        temp->next = NULL;
+        if(master_size_log == NULL) {
+            master_size_log = temp;
+        } else {
+            temp->next = master_size_log;
+            master_size_log = temp;
+        }
+        // END SIZE LOG
+
+        if(1 || count % 10 == 0) {
+            printf("Number of jobs remaining: %i, chunk: %i\n", jobs_remaining, job_chunk_size);
+        }
+
         log_message(master_log, JOB_ASSIGNMENT_RATE_MSG, job_chunk_size);
 
         JobData * jobs_to_give = generate_job_nodes(job_chunk_size, job_type, master_thread_id);
         
-        imitate_network_delay(master_thread_id);
+        
 
         int iteration = 0;
         while(job_distribution_succeeded == FALSE && iteration < cycle_length) {
+
+            imitate_network_delay(master_thread_id);
+
             node_index = select_worker_node(worker_params, num_workers, node_index, node_selection_strategy, master_thread_id);
 
             //printf("Attempting to add %i jobs to node %i \n", job_chunk_size, node_index);
@@ -212,6 +238,11 @@ void launch_master_node(int num_workers, int node_selection_strategy, int job_as
 
     // prints master log
     print_and_free_log(master_log, master_thread_id, relative_start_timestamp);
+
+    while(master_size_log != NULL) {
+        printf("%li, %li, %i, %i\n", master_size_log->timestamp, master_size_log->timestamp - relative_start_timestamp, master_size_log->size, JOBS_REMAINING_MSG);
+        master_size_log = master_size_log->next;
+    }
 
     printf("Number of LARGE jobs: %i\n", get_job_frequency(LARGE_JOB));
     printf("Number of MID jobs: %i\n", get_job_frequency(MID_JOB));
