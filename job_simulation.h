@@ -296,6 +296,12 @@ double ms_to_sec(long ms);
     Thread safe random number generator.
 */
 int get_rand(int thread_id);
+
+/*
+    Given number of each type of job, an estimate is returned on how long 
+    a sequential run would have taken.
+*/
+unsigned long estimate_sequential_timing(int num_small, int num_mid, int num_large);
 /*****************************************
 ************UTILS OPERATIONS HEADERS******
 ******************************************/

@@ -22,3 +22,22 @@ int get_rand(int thread_id) {
 	//printf("thread seeed: %i\n", seed[thread_id + 1]);
 	return rand_r(&seed[thread_id + 1]);
 }
+
+unsigned long estimate_sequential_timing(int num_small, int num_mid, int num_large) {
+    unsigned long start = usecs();
+    sample_job(SMALL_JOB);
+    unsigned long end = usecs();
+    unsigned long diff = (end - start) * num_small;
+
+    start = usecs();
+    sample_job(MID_JOB);
+    end = usecs();
+    diff += (end - start) * num_mid;
+
+    start = usecs();
+    sample_job(LARGE_JOB);
+    end = usecs();
+    diff += (end - start) * num_large;
+
+    return diff;
+}

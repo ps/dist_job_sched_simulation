@@ -1,5 +1,7 @@
 #include "job_simulation.h"
 
+#define DISPLAY_DEBUG 1
+
 int select_worker_node(WorkerParams * worker_params, int num_workers, int previous_selection, int selection_strategy, int master_thread_id) {
     if(selection_strategy == NODE_SELECT_SEQUENTIAL) {
         if(previous_selection < 0) {
@@ -71,7 +73,7 @@ int get_job_distribution_chunk(int previous_chunk_size, int previous_distributio
 void imitate_network_delay(int master_thread_id) {
     struct timespec ts;
     ts.tv_sec = 0;
-    ts.tv_nsec = get_rand(master_thread_id) % 250000000;
+    ts.tv_nsec = get_rand(master_thread_id) % 50000000;
 
     nanosleep(&ts, NULL);
 }
@@ -93,18 +95,22 @@ void print_and_free_log(Log * log, int thread_id, unsigned long relative_start_t
     free_log(log);
 }
 
-void join_workers(int num_workers, pthread_t * worker, WorkerParams * worker_params, unsigned long relative_start_timestamp) {
-    printf("Master joining on workers.\n");
+void print_worker_logs(int num_workers, WorkerParams * worker_params, unsigned long relative_start_timestamp) {
     int i;
     for(i = 0; i < num_workers; i++) {
-        pthread_join(worker[i], NULL);
         print_and_free_log(worker_params[i].log, i, relative_start_timestamp);
         free(worker_params[i].jobs);
     }
 }
 
+void join_workers(int num_workers, pthread_t * worker) {
+    int i;
+    for(i = 0; i < num_workers; i++) {
+        pthread_join(worker[i], NULL);
+    }
+}
+
 void launch_workers(int num_workers, WorkerParams * worker_params, pthread_t * worker) {
-    printf("Master about to launch slaves.\n"); 
     int i;
     for(i = 0; i < num_workers; i++) {
         init_worker_param(&worker_params[i], i);
@@ -122,12 +128,6 @@ void init_master_data(int num_workers,
     *master_log = init_log();
 }
 
-typedef struct Node {
-    unsigned long timestamp;
-    int size;
-    struct Node * next;
-} Node;
-
 /*
     The idea will be to in a retry loop first select node to give job, then try to add, if fail
     repeat this cycle until success
@@ -139,8 +139,8 @@ void launch_master_node(int num_workers, int node_selection_strategy, int job_as
     WorkerParams * worker_params;
     Log * master_log;
     init_master_data(num_workers, &master_thread_id, &worker, &worker_params, &master_log);
-    Node * master_size_log = NULL;
 
+    printf("Master about to launch slaves.\n"); 
     launch_workers(num_workers, worker_params, worker);
 
     printf("Master ready to begin job assignment.\n");
@@ -162,7 +162,6 @@ void launch_master_node(int num_workers, int node_selection_strategy, int job_as
         count++;
         log_message(master_log, JOBS_REMAINING_MSG, jobs_remaining);
 
-        //printf("Jobs remaining: %i\n", jobs_remaining);
         job_chunk_size = get_job_distribution_chunk(job_chunk_size, job_distribution_succeeded, job_assignment_strategy);
 
         // reset distribution success
@@ -171,21 +170,7 @@ void launch_master_node(int num_workers, int node_selection_strategy, int job_as
             job_chunk_size = jobs_remaining;
         }
 
-
-        // START SIZE LOG
-        Node * temp = (Node *)malloc(sizeof(Node));
-        temp->timestamp = usecs();
-        temp->size = jobs_remaining;
-        temp->next = NULL;
-        if(master_size_log == NULL) {
-            master_size_log = temp;
-        } else {
-            temp->next = master_size_log;
-            master_size_log = temp;
-        }
-        // END SIZE LOG
-
-        if(1 || count % 10 == 0) {
+        if(DISPLAY_DEBUG && count % 10 == 0) {
             printf("Number of jobs remaining: %i, chunk: %i\n", jobs_remaining, job_chunk_size);
         }
 
@@ -193,8 +178,6 @@ void launch_master_node(int num_workers, int node_selection_strategy, int job_as
 
         JobData * jobs_to_give = generate_job_nodes(job_chunk_size, job_type, master_thread_id);
         
-        
-
         int iteration = 0;
         while(job_distribution_succeeded == FALSE && iteration < cycle_length) {
 
@@ -202,7 +185,6 @@ void launch_master_node(int num_workers, int node_selection_strategy, int job_as
 
             node_index = select_worker_node(worker_params, num_workers, node_index, node_selection_strategy, master_thread_id);
 
-            //printf("Attempting to add %i jobs to node %i \n", job_chunk_size, node_index);
             pthread_mutex_lock(&worker_params[node_index].jobs_lock);
             Jobs * jobs = worker_params[node_index].jobs;
 
@@ -233,22 +215,30 @@ void launch_master_node(int num_workers, int node_selection_strategy, int job_as
 
     log_message(master_log, END_PROCESSING_MSG, NO_DATA);
     
+    // joins threads
+    printf("Master joining on workers.\n");
+    join_workers(num_workers, worker);
+    unsigned long end_timestamp = usecs();
+    unsigned long threaded_timing = end_timestamp - relative_start_timestamp;
+
     // joins threads, prints log, cleans up worker allocated data
-    join_workers(num_workers, worker, worker_params, relative_start_timestamp);
+    print_worker_logs(num_workers, worker_params, relative_start_timestamp);
 
     // prints master log
     print_and_free_log(master_log, master_thread_id, relative_start_timestamp);
 
-    while(master_size_log != NULL) {
-        printf("%li, %li, %i, %i\n", master_size_log->timestamp, master_size_log->timestamp - relative_start_timestamp, master_size_log->size, JOBS_REMAINING_MSG);
-        master_size_log = master_size_log->next;
-    }
+    int num_small = get_job_frequency(SMALL_JOB);
+    int num_mid = get_job_frequency(MID_JOB);
+    int num_large = get_job_frequency(LARGE_JOB);
+    printf("\n\nNumber of LARGE jobs: %i\n", num_large);
+    printf("Number of MID jobs: %i\n", num_mid);
+    printf("Number of SMALL jobs: %i\n", num_large);
 
-    printf("Number of LARGE jobs: %i\n", get_job_frequency(LARGE_JOB));
-    printf("Number of MID jobs: %i\n", get_job_frequency(MID_JOB));
-    printf("Number of SMALL jobs: %i\n", get_job_frequency(SMALL_JOB));
+    unsigned long sequential_estimation_timing = estimate_sequential_timing(num_small, num_mid, num_large);
+
+    printf("Estimated sequential processing time: %li ms = %lf sec\n", sequential_estimation_timing, ms_to_sec(sequential_estimation_timing));
+    printf("Rough speedup: %.2f\n", sequential_estimation_timing / (double) threaded_timing);
     
     free(worker);
     free(worker_params);
-    printf("Master exiting.\n");
 }
