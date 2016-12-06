@@ -81,7 +81,7 @@ def main():
 	min_x_2 = sys.maxint
 	max_y_2 = minint
 	min_y_2 = sys.maxint
-	
+
 	# (raw_time, adjusted_time, data, message id)
 	for line in lines:
 		if len(line) == 0:
@@ -133,27 +133,33 @@ def main():
 		y_list_2 = [point[1] for point in sorted_points]
 
 		axis = [0, max_x + 1, 0, max_y + 1]
+
+		plt.figure().suptitle("Master Node Distribution", fontsize=14, fontweight="bold")
+		plt.subplot(111)
 		plt.plot(x_list, y_list, "bo-")
 		plt.axis(axis)
-		plt.title("Master Node Distribution, %s Jobs, %s distribution" % (NUM_JOBS, DIST_MODE))
+		plt.title("%s (%s) Jobs, %s distribution, %s node selection" % (NUM_JOBS, JOB_TYPE, DIST_MODE, NODE_SELECTION))
 		plt.xlabel("time in microseconds")
 		plt.ylabel("master chunk distribution size")
 		plt.savefig("thread%s-assign_rate.png" % thread_id)
 		plt.clf()
 
 		axis = [0, max_x_2 + 1, 0, max_y_2 + 1]
+		plt.figure().suptitle("Master Node Jobs Remaining", fontsize=14, fontweight="bold")
+		plt.subplot(111)
 		plt.plot(x_list_2, y_list_2, "bo-")
 		plt.axis(axis)
-		plt.title("Master Node Jobs Remaining, %s distribution" % (DIST_MODE))
+		plt.title("%s distribution, %s node selection" % (DIST_MODE, NODE_SELECTION))
 		plt.xlabel("time in microseconds")
-		plt.ylabel("jobs remaining")
+		plt.ylabel("jobs (%s) remaining" % JOB_TYPE)
 		plt.savefig("thread%s-jobs_remaining.png" % thread_id)
 	else:
 		axis = [0, max_x + 1, 0, max_y + 1]
+		plt.figure().suptitle("Node %s" % thread_id, fontsize=14, fontweight="bold")
+		plt.subplot(111)
 		plt.plot(x_list, y_list, "bo-")
 		plt.axis(axis)
-		title = "Node %s, %s Jobs, %s distribution" % (thread_id, NUM_JOBS, DIST_MODE)
-		plt.title(title)
+		plt.title("%s (%s) Jobs, %s distribution" % (NUM_JOBS, JOB_TYPE, DIST_MODE))
 		plt.xlabel("time in microseconds")
 		plt.ylabel("worker queue size")
 		plt.savefig("thread%s-queue_size.png" % thread_id)

@@ -237,7 +237,7 @@ void launch_master_node(int num_workers, int node_selection_strategy, int job_as
     unsigned long sequential_estimation_timing = estimate_sequential_timing(num_small, num_mid, num_large);
 
     printf("Estimated sequential processing time: %li ms = %lf sec\n", sequential_estimation_timing, ms_to_sec(sequential_estimation_timing));
-    printf("Rough speedup: %.2f\n", sequential_estimation_timing / (double) threaded_timing);
+    printf("Rough speedup: %.2fx\n", sequential_estimation_timing / (double) threaded_timing);
     
     free(worker);
     free(worker_params);
