@@ -143,7 +143,7 @@ void launch_master_node(int num_workers, int node_selection_strategy, int job_as
     printf("Master about to launch slaves.\n"); 
     launch_workers(num_workers, worker_params, worker);
 
-    printf("Master ready to begin job assignment.\n");
+    printf("Master distributing jobs...\n");
     unsigned long relative_start_timestamp = usecs();
 
     log_message(master_log, START_PROCESSING_MSG, NO_DATA);

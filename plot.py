@@ -89,7 +89,7 @@ def main():
 		line = line.replace(" ", "")
 		line = line.replace("\n", "")
 		data = line.split(",")
-		x_data = int(data[1])
+		x_data = int(data[1]) / 1000.0
 		y_data = int(data[2])
 		msg_id = int(data[3])
 
@@ -139,7 +139,7 @@ def main():
 		plt.plot(x_list, y_list, "bo-")
 		plt.axis(axis)
 		plt.title("%s (%s) Jobs, %s distribution, %s node selection" % (NUM_JOBS, JOB_TYPE, DIST_MODE, NODE_SELECTION))
-		plt.xlabel("time in microseconds")
+		plt.xlabel("time in miliseconds")
 		plt.ylabel("master chunk distribution size")
 		plt.savefig("thread%s-assign_rate.png" % thread_id)
 		plt.clf()
@@ -150,17 +150,17 @@ def main():
 		plt.plot(x_list_2, y_list_2, "bo-")
 		plt.axis(axis)
 		plt.title("%s distribution, %s node selection" % (DIST_MODE, NODE_SELECTION))
-		plt.xlabel("time in microseconds")
+		plt.xlabel("time in miliseconds")
 		plt.ylabel("jobs (%s) remaining" % JOB_TYPE)
 		plt.savefig("thread%s-jobs_remaining.png" % thread_id)
 	else:
-		axis = [0, max_x + 1, 0, max_y + 1]
+		axis = [0, max_x + 1, 0, 51]
 		plt.figure().suptitle("Node %s" % thread_id, fontsize=14, fontweight="bold")
 		plt.subplot(111)
 		plt.plot(x_list, y_list, "bo-")
 		plt.axis(axis)
 		plt.title("%s (%s) Jobs, %s distribution" % (NUM_JOBS, JOB_TYPE, DIST_MODE))
-		plt.xlabel("time in microseconds")
+		plt.xlabel("time in miliseconds")
 		plt.ylabel("worker queue size")
 		plt.savefig("thread%s-queue_size.png" % thread_id)
 
