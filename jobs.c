@@ -7,7 +7,7 @@ void clear_array(double * data, int size) {
 	}
 }
 
-void sample_job(double job_scale) {
+void sample_job(int job_scale) {
 	job_scale = abs(job_scale);
 	if(0 && job_scale > 1.0) {
 		printf("WARNING: Invalid job size scale, rescaling to 1. Value must be contained in interval [0,1]\n");

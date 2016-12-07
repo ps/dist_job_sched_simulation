@@ -1,7 +1,7 @@
 #include "job_simulation.h"
 
 static int job_frequency[3] = {0, 0, 0};
-static double job_scales[3] = {LARGE_JOB, MID_JOB, SMALL_JOB};
+static int job_scales[3] = {LARGE_JOB, MID_JOB, SMALL_JOB};
 
 void increment_job_count(int job_type) {
     if (job_type == LARGE_JOB) {
@@ -24,7 +24,7 @@ int get_job_frequency(int job_type) {
     return -1;
 }
 
-double get_job_scale_factor(int job_type, int thread_id) {
+int get_job_scale_factor(int job_type, int thread_id) {
     if(job_type == VARIED_JOB) {
         int r = get_rand(thread_id);
         int index = r % 3;

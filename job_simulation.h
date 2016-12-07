@@ -162,11 +162,11 @@ extern int CONSTANT_JOB_CHUNK_SIZE;
 ******************************************/
 
 // defining function pointer with void return and no arguments provided
-typedef void (*JobFunction)(double);
+typedef void (*JobFunction)(int);
 
 typedef struct JobData {
     int empty;
-    double job_parameter;
+    int job_parameter;
     JobFunction job_function;    
 } JobData;
 
@@ -314,7 +314,7 @@ unsigned long estimate_sequential_timing(int num_small, int num_mid, int num_lar
     passed parameter. Expected parameters are the
     ones specified by job types macros above.
 */
-void sample_job(double job_scale);
+void sample_job(int job_scale);
 /*****************************************
 *************JOBS OPERATIONS HEADERS******
 ******************************************/
