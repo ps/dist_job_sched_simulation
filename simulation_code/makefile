@@ -27,4 +27,4 @@ $(OBJ_DIR)/%.o: %.c job_simulation.h
 
 #removes all the object files created in the process
 clean:
-		rm -rf job_simulation obj *.dat *.png
+		rm -rf job_simulation obj *.dat *.png small_* mid_* large_* varied_*
