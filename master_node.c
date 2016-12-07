@@ -232,10 +232,11 @@ void launch_master_node(int num_workers, int node_selection_strategy, int job_as
     int num_large = get_job_frequency(LARGE_JOB);
     printf("\n\nNumber of LARGE jobs: %i\n", num_large);
     printf("Number of MID jobs: %i\n", num_mid);
-    printf("Number of SMALL jobs: %i\n", num_large);
+    printf("Number of SMALL jobs: %i\n", num_small);
 
     unsigned long sequential_estimation_timing = estimate_sequential_timing(num_small, num_mid, num_large);
 
+    printf("Threaded timing: %li ms = %lf sec \n", threaded_timing, ms_to_sec(threaded_timing));
     printf("Estimated sequential processing time: %li ms = %lf sec\n", sequential_estimation_timing, ms_to_sec(sequential_estimation_timing));
     printf("Rough speedup: %.2fx\n", sequential_estimation_timing / (double) threaded_timing);
     
