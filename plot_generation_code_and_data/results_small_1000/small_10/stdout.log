@@ -1,0 +1,66 @@
+==============PARAMETERS===========================
+Number of jobs to distribute: 			1000
+Type of jobs being ran by workers: 		SMALL jobs
+Number of workers: 				10
+Worker queue capacity: 				50
+Max number of jobs assigned by master: 		30
+Worker node selection strategy: 		SHORTEST QUEUE
+Job distribution strategy: 			LINEAR
+Constant chunk distribution size (used only if job distribution is CONSTANT): 10
+==============PARAMETERS===========================
+
+Master about to launch slaves.
+Master ready to begin job assignment.
+Master joining on workers.
+
+Log for thread id 0
+Remember that logs are printed from last event to first event.
+Node 0 processed for 36577153 ms = 36.577153 sec
+
+Log for thread id 1
+Remember that logs are printed from last event to first event.
+Node 1 processed for 36901809 ms = 36.901809 sec
+
+Log for thread id 2
+Remember that logs are printed from last event to first event.
+Node 2 processed for 37274858 ms = 37.274858 sec
+
+Log for thread id 3
+Remember that logs are printed from last event to first event.
+Node 3 processed for 37586432 ms = 37.586432 sec
+
+Log for thread id 4
+Remember that logs are printed from last event to first event.
+Node 4 processed for 37937489 ms = 37.937489 sec
+
+Log for thread id 5
+Remember that logs are printed from last event to first event.
+Node 5 processed for 37006901 ms = 37.006901 sec
+
+Log for thread id 6
+Remember that logs are printed from last event to first event.
+Node 6 processed for 35291776 ms = 35.291776 sec
+
+Log for thread id 7
+Remember that logs are printed from last event to first event.
+Node 7 processed for 35667342 ms = 35.667342 sec
+
+Log for thread id 8
+Remember that logs are printed from last event to first event.
+Node 8 processed for 35996174 ms = 35.996174 sec
+
+Log for thread id 9
+Remember that logs are printed from last event to first event.
+Node 9 processed for 36066803 ms = 36.066803 sec
+
+Log for thread id -1
+Remember that logs are printed from last event to first event.
+Node -1 processed for 19538737 ms = 19.538737 sec
+
+
+Number of LARGE jobs: 0
+Number of MID jobs: 0
+Number of SMALL jobs: 1000
+Threaded timing: 37937056 ms = 37.937056 sec 
+Estimated sequential processing time: 320745000 ms = 320.745000 sec
+Rough speedup: 8.45x

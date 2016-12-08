@@ -1,0 +1,66 @@
+==============PARAMETERS===========================
+Number of jobs to distribute: 			1000
+Type of jobs being ran by workers: 		LARGE jobs
+Number of workers: 				10
+Worker queue capacity: 				50
+Max number of jobs assigned by master: 		30
+Worker node selection strategy: 		SHORTEST QUEUE
+Job distribution strategy: 			CONSTANT
+Constant chunk distribution size (used only if job distribution is CONSTANT): 10
+==============PARAMETERS===========================
+
+Master about to launch slaves.
+Master ready to begin job assignment.
+Master joining on workers.
+
+Log for thread id 0
+Remember that logs are printed from last event to first event.
+Node 0 processed for 146138383 ms = 146.138383 sec
+
+Log for thread id 1
+Remember that logs are printed from last event to first event.
+Node 1 processed for 145938359 ms = 145.938359 sec
+
+Log for thread id 2
+Remember that logs are printed from last event to first event.
+Node 2 processed for 146313502 ms = 146.313502 sec
+
+Log for thread id 3
+Remember that logs are printed from last event to first event.
+Node 3 processed for 146184020 ms = 146.184020 sec
+
+Log for thread id 4
+Remember that logs are printed from last event to first event.
+Node 4 processed for 146346166 ms = 146.346166 sec
+
+Log for thread id 5
+Remember that logs are printed from last event to first event.
+Node 5 processed for 146376049 ms = 146.376049 sec
+
+Log for thread id 6
+Remember that logs are printed from last event to first event.
+Node 6 processed for 146328057 ms = 146.328057 sec
+
+Log for thread id 7
+Remember that logs are printed from last event to first event.
+Node 7 processed for 146467848 ms = 146.467848 sec
+
+Log for thread id 8
+Remember that logs are printed from last event to first event.
+Node 8 processed for 146499781 ms = 146.499781 sec
+
+Log for thread id 9
+Remember that logs are printed from last event to first event.
+Node 9 processed for 146393359 ms = 146.393359 sec
+
+Log for thread id -1
+Remember that logs are printed from last event to first event.
+Node -1 processed for 71961292 ms = 71.961292 sec
+
+
+Number of LARGE jobs: 1000
+Number of MID jobs: 0
+Number of SMALL jobs: 0
+Threaded timing: 146499819 ms = 146.499819 sec 
+Estimated sequential processing time: 1282487000 ms = 1282.487000 sec
+Rough speedup: 8.75x

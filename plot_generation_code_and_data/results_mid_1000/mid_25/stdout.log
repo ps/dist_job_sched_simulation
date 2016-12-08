@@ -1,0 +1,46 @@
+==============PARAMETERS===========================
+Number of jobs to distribute: 			1000
+Type of jobs being ran by workers: 		MID jobs
+Number of workers: 				5
+Worker queue capacity: 				50
+Max number of jobs assigned by master: 		30
+Worker node selection strategy: 		SEQUENTIAL
+Job distribution strategy: 			EXPONENTIAL
+Constant chunk distribution size (used only if job distribution is CONSTANT): 10
+==============PARAMETERS===========================
+
+Master about to launch slaves.
+Master ready to begin job assignment.
+Master joining on workers.
+
+Log for thread id 0
+Remember that logs are printed from last event to first event.
+Node 0 processed for 134473897 ms = 134.473897 sec
+
+Log for thread id 1
+Remember that logs are printed from last event to first event.
+Node 1 processed for 133129815 ms = 133.129815 sec
+
+Log for thread id 2
+Remember that logs are printed from last event to first event.
+Node 2 processed for 135381387 ms = 135.381387 sec
+
+Log for thread id 3
+Remember that logs are printed from last event to first event.
+Node 3 processed for 133751092 ms = 133.751092 sec
+
+Log for thread id 4
+Remember that logs are printed from last event to first event.
+Node 4 processed for 134586476 ms = 134.586476 sec
+
+Log for thread id -1
+Remember that logs are printed from last event to first event.
+Node -1 processed for 100699081 ms = 100.699081 sec
+
+
+Number of LARGE jobs: 0
+Number of MID jobs: 1000
+Number of SMALL jobs: 0
+Threaded timing: 135380876 ms = 135.380876 sec 
+Estimated sequential processing time: 640427000 ms = 640.427000 sec
+Rough speedup: 4.73x

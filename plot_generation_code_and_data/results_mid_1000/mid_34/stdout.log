@@ -1,0 +1,66 @@
+==============PARAMETERS===========================
+Number of jobs to distribute: 			1000
+Type of jobs being ran by workers: 		MID jobs
+Number of workers: 				10
+Worker queue capacity: 				50
+Max number of jobs assigned by master: 		30
+Worker node selection strategy: 		SHORTEST QUEUE
+Job distribution strategy: 			EXPONENTIAL
+Constant chunk distribution size (used only if job distribution is CONSTANT): 10
+==============PARAMETERS===========================
+
+Master about to launch slaves.
+Master ready to begin job assignment.
+Master joining on workers.
+
+Log for thread id 0
+Remember that logs are printed from last event to first event.
+Node 0 processed for 73835354 ms = 73.835354 sec
+
+Log for thread id 1
+Remember that logs are printed from last event to first event.
+Node 1 processed for 73812270 ms = 73.812270 sec
+
+Log for thread id 2
+Remember that logs are printed from last event to first event.
+Node 2 processed for 73774829 ms = 73.774829 sec
+
+Log for thread id 3
+Remember that logs are printed from last event to first event.
+Node 3 processed for 73230112 ms = 73.230112 sec
+
+Log for thread id 4
+Remember that logs are printed from last event to first event.
+Node 4 processed for 71797657 ms = 71.797657 sec
+
+Log for thread id 5
+Remember that logs are printed from last event to first event.
+Node 5 processed for 73835148 ms = 73.835148 sec
+
+Log for thread id 6
+Remember that logs are printed from last event to first event.
+Node 6 processed for 73814984 ms = 73.814984 sec
+
+Log for thread id 7
+Remember that logs are printed from last event to first event.
+Node 7 processed for 71751027 ms = 71.751027 sec
+
+Log for thread id 8
+Remember that logs are printed from last event to first event.
+Node 8 processed for 71793605 ms = 71.793605 sec
+
+Log for thread id 9
+Remember that logs are printed from last event to first event.
+Node 9 processed for 73985642 ms = 73.985642 sec
+
+Log for thread id -1
+Remember that logs are printed from last event to first event.
+Node -1 processed for 38130481 ms = 38.130481 sec
+
+
+Number of LARGE jobs: 0
+Number of MID jobs: 1000
+Number of SMALL jobs: 0
+Threaded timing: 73985677 ms = 73.985677 sec 
+Estimated sequential processing time: 641427000 ms = 641.427000 sec
+Rough speedup: 8.67x

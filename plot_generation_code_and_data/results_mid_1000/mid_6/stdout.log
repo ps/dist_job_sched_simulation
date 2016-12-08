@@ -1,0 +1,66 @@
+==============PARAMETERS===========================
+Number of jobs to distribute: 			1000
+Type of jobs being ran by workers: 		MID jobs
+Number of workers: 				10
+Worker queue capacity: 				50
+Max number of jobs assigned by master: 		30
+Worker node selection strategy: 		RANDOM
+Job distribution strategy: 			LINEAR
+Constant chunk distribution size (used only if job distribution is CONSTANT): 10
+==============PARAMETERS===========================
+
+Master about to launch slaves.
+Master ready to begin job assignment.
+Master joining on workers.
+
+Log for thread id 0
+Remember that logs are printed from last event to first event.
+Node 0 processed for 73284473 ms = 73.284473 sec
+
+Log for thread id 1
+Remember that logs are printed from last event to first event.
+Node 1 processed for 73777164 ms = 73.777164 sec
+
+Log for thread id 2
+Remember that logs are printed from last event to first event.
+Node 2 processed for 72202144 ms = 72.202144 sec
+
+Log for thread id 3
+Remember that logs are printed from last event to first event.
+Node 3 processed for 74669371 ms = 74.669371 sec
+
+Log for thread id 4
+Remember that logs are printed from last event to first event.
+Node 4 processed for 72430061 ms = 72.430061 sec
+
+Log for thread id 5
+Remember that logs are printed from last event to first event.
+Node 5 processed for 72549079 ms = 72.549079 sec
+
+Log for thread id 6
+Remember that logs are printed from last event to first event.
+Node 6 processed for 74614884 ms = 74.614884 sec
+
+Log for thread id 7
+Remember that logs are printed from last event to first event.
+Node 7 processed for 72027266 ms = 72.027266 sec
+
+Log for thread id 8
+Remember that logs are printed from last event to first event.
+Node 8 processed for 73551428 ms = 73.551428 sec
+
+Log for thread id 9
+Remember that logs are printed from last event to first event.
+Node 9 processed for 73920723 ms = 73.920723 sec
+
+Log for thread id -1
+Remember that logs are printed from last event to first event.
+Node -1 processed for 37842355 ms = 37.842355 sec
+
+
+Number of LARGE jobs: 0
+Number of MID jobs: 1000
+Number of SMALL jobs: 0
+Threaded timing: 74668473 ms = 74.668473 sec 
+Estimated sequential processing time: 640705000 ms = 640.705000 sec
+Rough speedup: 8.58x

@@ -1,0 +1,106 @@
+==============PARAMETERS===========================
+Number of jobs to distribute: 			1000
+Type of jobs being ran by workers: 		MID jobs
+Number of workers: 				20
+Worker queue capacity: 				50
+Max number of jobs assigned by master: 		30
+Worker node selection strategy: 		RANDOM
+Job distribution strategy: 			LINEAR
+Constant chunk distribution size (used only if job distribution is CONSTANT): 10
+==============PARAMETERS===========================
+
+Master about to launch slaves.
+Master ready to begin job assignment.
+Master joining on workers.
+
+Log for thread id 0
+Remember that logs are printed from last event to first event.
+Node 0 processed for 44430741 ms = 44.430741 sec
+
+Log for thread id 1
+Remember that logs are printed from last event to first event.
+Node 1 processed for 22511768 ms = 22.511768 sec
+
+Log for thread id 2
+Remember that logs are printed from last event to first event.
+Node 2 processed for 42556136 ms = 42.556136 sec
+
+Log for thread id 3
+Remember that logs are printed from last event to first event.
+Node 3 processed for 44674616 ms = 44.674616 sec
+
+Log for thread id 4
+Remember that logs are printed from last event to first event.
+Node 4 processed for 44171382 ms = 44.171382 sec
+
+Log for thread id 5
+Remember that logs are printed from last event to first event.
+Node 5 processed for 43594234 ms = 43.594234 sec
+
+Log for thread id 6
+Remember that logs are printed from last event to first event.
+Node 6 processed for 42523664 ms = 42.523664 sec
+
+Log for thread id 7
+Remember that logs are printed from last event to first event.
+Node 7 processed for 44487191 ms = 44.487191 sec
+
+Log for thread id 8
+Remember that logs are printed from last event to first event.
+Node 8 processed for 23100133 ms = 23.100133 sec
+
+Log for thread id 9
+Remember that logs are printed from last event to first event.
+Node 9 processed for 22107425 ms = 22.107425 sec
+
+Log for thread id 10
+Remember that logs are printed from last event to first event.
+Node 10 processed for 42829041 ms = 42.829041 sec
+
+Log for thread id 11
+Remember that logs are printed from last event to first event.
+Node 11 processed for 44287974 ms = 44.287974 sec
+
+Log for thread id 12
+Remember that logs are printed from last event to first event.
+Node 12 processed for 42095933 ms = 42.095933 sec
+
+Log for thread id 13
+Remember that logs are printed from last event to first event.
+Node 13 processed for 41084194 ms = 41.084194 sec
+
+Log for thread id 14
+Remember that logs are printed from last event to first event.
+Node 14 processed for 22689478 ms = 22.689478 sec
+
+Log for thread id 15
+Remember that logs are printed from last event to first event.
+Node 15 processed for 44224056 ms = 44.224056 sec
+
+Log for thread id 16
+Remember that logs are printed from last event to first event.
+Node 16 processed for 44535419 ms = 44.535419 sec
+
+Log for thread id 17
+Remember that logs are printed from last event to first event.
+Node 17 processed for 23021932 ms = 23.021932 sec
+
+Log for thread id 18
+Remember that logs are printed from last event to first event.
+Node 18 processed for 23073785 ms = 23.073785 sec
+
+Log for thread id 19
+Remember that logs are printed from last event to first event.
+Node 19 processed for 40970149 ms = 40.970149 sec
+
+Log for thread id -1
+Remember that logs are printed from last event to first event.
+Node -1 processed for 7576849 ms = 7.576849 sec
+
+
+Number of LARGE jobs: 0
+Number of MID jobs: 1000
+Number of SMALL jobs: 0
+Threaded timing: 44673292 ms = 44.673292 sec 
+Estimated sequential processing time: 640668000 ms = 640.668000 sec
+Rough speedup: 14.34x
