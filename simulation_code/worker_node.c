@@ -6,7 +6,6 @@ void * worker_node(void * params) {
     Log * log = my_params->log;
     pthread_mutex_t * jobs_lock = &my_params->jobs_lock;
     pthread_cond_t * work_added = &my_params->work_added;
-    //printf("Node %i spawned.\n", thread_id);
 
     log_message(log, START_PROCESSING_MSG, NO_DATA);
     while(TRUE) {
@@ -16,14 +15,13 @@ void * worker_node(void * params) {
         while(jobs->size == 0 && jobs->terminate == FALSE) {
             if(!show) {
                 show = TRUE;
-                //printf("Node id %i waiting for jobs.\n", thread_id);
             }
             pthread_cond_wait(work_added, jobs_lock);
         }
-        // NOTE: IF THERE ARE ISSUES THIS COULD BE THE CAUSE
+        // NOTE: If concurrency issues happen to occur, see if acquiring then releasing a 
+        // second lock (as is done inside log_message) is causing trouble
         log_message(log, WORKER_QUEUE_SIZE_MSG, jobs->size);
         
-        //printf("Node id %i job queue %i\n", thread_id, jobs->size);
         int terminate = jobs->terminate;
         JobData job_data = remove_job(jobs);
         int num_jobs_remaining = jobs->size;
@@ -31,9 +29,7 @@ void * worker_node(void * params) {
 
         if(job_data.empty == FALSE) {
             JobFunction job = job_data.job_function;
-            //printf("Node id %i received job, about to process\n", thread_id);
             job(job_data.job_parameter);
-            //printf("Node id %i FINISHED JOB\n", thread_id);
         } else {
             if(num_jobs_remaining != 0) {
                 printf("UNEXPECTED ERROR: Node %i has NULL job with queue size %i\n", thread_id, num_jobs_remaining);
@@ -46,8 +42,6 @@ void * worker_node(void * params) {
         }
     }
     log_message(log, END_PROCESSING_MSG, NO_DATA);
-
-    //printf("Node id %i finished processing jobs and received terminate signal.\n", thread_id);
 
     pthread_exit((void *)NULL);
 }

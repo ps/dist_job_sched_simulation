@@ -14,8 +14,6 @@ void sample_job(int job_scale) {
 		job_scale = 1.0;
 	}
 	// 4 * 100000 ~ 0.4mb
-	// 4 * 2147483 ~ 8.6mb
-	//int array_size = 2147483 * job_scale; 
 	int array_size = 100000; 
 	int iterations = 2000 - job_scale;
 	double * data = (double *)malloc(sizeof(double) * array_size);
@@ -23,7 +21,6 @@ void sample_job(int job_scale) {
     volatile int i, k;
     volatile double q = 34.5 * job_scale;
     volatile double z = -23.2 + job_scale;
-    //volatile int loop_bound = (int) INT_MAX * job_scale;
     for(i = 0; i < iterations; i++) {
 		for(k = 1; k < array_size; k++) {
 			asm("");

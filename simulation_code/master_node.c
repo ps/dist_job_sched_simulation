@@ -178,6 +178,8 @@ void launch_master_node(int num_workers, int node_selection_strategy, int job_as
 
         JobData * jobs_to_give = generate_job_nodes(job_chunk_size, job_type, master_thread_id);
         
+        // iterate through the 'cycle_length' (which equals number of workers) as long as you have
+        // not been able to give out the current job chunk
         int iteration = 0;
         while(job_distribution_succeeded == FALSE && iteration < cycle_length) {
 
@@ -189,11 +191,7 @@ void launch_master_node(int num_workers, int node_selection_strategy, int job_as
             Jobs * jobs = worker_params[node_index].jobs;
 
             job_distribution_succeeded = add_jobs(jobs, jobs_to_give, job_chunk_size);
-            /*if(job_distribution_succeeded == TRUE) {
-                printf("Job added to node %i, queue_size: %i\n", node_index, jobs->size);
-            } else {
-                printf("Job NOT added to node %i, queue_size: %i\n", node_index, jobs->size);
-            }*/
+
             pthread_cond_broadcast(&worker_params[node_index].work_added);
             pthread_mutex_unlock(&worker_params[node_index].jobs_lock);
 

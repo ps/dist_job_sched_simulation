@@ -29,8 +29,6 @@ void print_log(Log * log, int thread_id, unsigned long relative_start) {
             end = timestamp;
         }
 
-        // do something about WORKER_SLEEP_TIME_MSG here such as add up all the time
-
 
         if(stdout) {
             printf("msg: %i timestamp: %lu data: %i\n", msg_id, timestamp, data);

@@ -10,8 +10,6 @@ START_PROCESSING_MSG = 555
 END_PROCESSING_MSG = 666
 #    Stores the queue size of worker at current timestamp.
 WORKER_QUEUE_SIZE_MSG = 777
-#    Stores the sleep time in microseconds of worker.
-WORKER_SLEEP_TIME_MSG = 888
 #    Stores the number of jobs remaining to distribute.
 JOBS_REMAINING_MSG = 999
 

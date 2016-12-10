@@ -28,7 +28,6 @@ int get_job_scale_factor(int job_type, int thread_id) {
     if(job_type == VARIED_JOB) {
         int r = get_rand(thread_id);
         int index = r % 3;
-        //printf("rand: %i index: %i\n", r, index);
         return job_scales[index];
     } else if (job_type == LARGE_JOB) {
         return job_scales[0];

@@ -208,23 +208,5 @@ int main(int argc, char ** argv) {
 
     launch_master_node(NUM_WORKERS, NODE_SELECTION_STRATEGY, JOB_DISTRIBUTION_STRATEGY, JOB_TYPE);
 
-    /*long start = usecs();
-    sample_job(SMALL_JOB);
-    long end = usecs();
-    long diff = end - start;
-    printf("SMALL: 1/4 full took %li ms = %lf sec\n", diff, ms_to_sec(diff));
-
-
-    start = usecs();
-    sample_job(MID_JOB);
-    end = usecs();
-    diff = end - start;
-    printf("MID: 1/2 full took %li ms = %lf sec\n", diff, ms_to_sec(diff));
-
-    start = usecs();
-    sample_job(LARGE_JOB);
-    end = usecs();
-    diff = end - start;
-    printf("LARGE: 1 full took %li ms = %lf sec\n", diff, ms_to_sec(diff));*/
     return 0;
 }

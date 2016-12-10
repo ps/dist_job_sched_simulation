@@ -18,8 +18,6 @@ int get_rand(int thread_id) {
 	if(seed[thread_id+1] == 0) {
 		seed[thread_id+1] = time(NULL) + thread_id + 1;
 	}
-	//unsigned int thread_seed = seed + thread_id;
-	//printf("thread seeed: %i\n", seed[thread_id + 1]);
 	return rand_r(&seed[thread_id + 1]);
 }
 
