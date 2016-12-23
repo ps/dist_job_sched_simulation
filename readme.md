@@ -6,6 +6,7 @@ Repository Structure
 =====================
 - simulation_code: contains all the source code necessary to run a single simulation
 - plot_generation_code_and_data: contains data obtained on Rutgers Elf cluster and plots generated from that data
+- report: contains tex file and dependencies necessary to compile the written report
 
 Tests Ran
 ===========
